@@ -15,8 +15,11 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('employee_code')->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            $table->boolean('is_active')->default(true);  // Super Admin can deactivate users
+            $table->foreignId('assigned_to')->nullable()->constrained('users')->nullOnDelete(); // RM assigned to whom
             $table->rememberToken();
             $table->timestamps();
         });

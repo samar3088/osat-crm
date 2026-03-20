@@ -2,31 +2,31 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Spatie\Permission\Traits\HasRoles; // 👈 Spatie roles trait
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasRoles; // 👈 HasRoles added
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
+     * Fields that can be mass assigned
+     * (safe to fill via create() or update())
      */
     protected $fillable = [
         'name',
         'email',
+        'employee_code',
         'password',
+        'is_active',
+        'assigned_to',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
+     * Fields hidden from arrays/JSON
+     * (never expose password or remember token)
      */
     protected $hidden = [
         'password',
@@ -34,15 +34,58 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Type casting
      */
     protected function casts(): array
     {
         return [
             'email_verified_at' => 'datetime',
-            'password' => 'hashed',
+            'password'          => 'hashed',  // Auto-hashes password on set
+            'is_active'         => 'boolean',
         ];
+    }
+
+    // ── Relationships ──────────────────────────────
+
+    /**
+     * Team member is assigned to a Super Admin or Branch Admin
+     */
+    public function assignedTo(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_to');
+    }
+
+    /**
+     * Super Admin / RM can have many customers assigned to them
+     */
+    public function assignedCustomers(): \Illuminate\Database\Eloquent\Relations\HasMany
+    {
+        return $this->hasMany(User::class, 'assigned_to');
+    }
+
+    // ── Helper Methods ─────────────────────────────
+
+    /**
+     * Check if user is Super Admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('super_admin');
+    }
+
+    /**
+     * Check if user is Team Member / RM
+     */
+    public function isTeamMember(): bool
+    {
+        return $this->hasRole('team_member');
+    }
+
+    /**
+     * Check if user is Customer
+     */
+    public function isCustomer(): bool
+    {
+        return $this->hasRole('customer');
     }
 }

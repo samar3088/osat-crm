@@ -6,23 +6,32 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class RegisterRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return false;
+        return true; // Controller will handle the logic
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
-            //
+            'name'          => ['required', 'string', 'min:3', 'max:100'],
+            'employee_code' => ['nullable', 'string', 'max:20'],
+            'email'         => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password'      => ['required', 'string', 'min:8', 'confirmed'], // confirmed = needs password_confirmation field
+            'terms'         => ['accepted'], // checkbox must be checked
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'name.required'     => 'Full name is required.',
+            'name.min'          => 'Name must be at least 3 characters.',
+            'email.required'    => 'Email address is required.',
+            'email.unique'      => 'This email is already registered.',
+            'password.min'      => 'Password must be at least 8 characters.',
+            'password.confirmed'=> 'Passwords do not match.',
+            'terms.accepted'    => 'You must accept the Terms of Service.',
         ];
     }
 }
