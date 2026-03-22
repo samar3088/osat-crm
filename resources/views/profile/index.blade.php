@@ -8,10 +8,10 @@
 <div class="w-full">
 
     {{-- ═══ PROFILE HEADER CARD ═══ --}}
-    <div class="bg-white rounded-card shadow-card overflow-hidden mb-6">
+    <div class="bg-white rounded-card shadow-card mb-6" style="overflow:hidden">
 
         {{-- Cover --}}
-        <div class="h-28 w-full"
+        <div class="h-12 w-full"
              style="background: linear-gradient(135deg, #0a4a78 0%, #0e6099 60%, #1a7ec4 100%)">
         </div>
 

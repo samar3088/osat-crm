@@ -153,13 +153,21 @@
             {{-- Tools --}}
             <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Tools</div>
 
-            <a href="#"
+            <a href="{{ route('calculators') }}"
             title="Calculators"
-            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
+                    {{ request()->routeIs('calculators') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                    <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
-                    <line x1="8" y1="21" x2="16" y2="21"/>
-                    <line x1="12" y1="17" x2="12" y2="21"/>
+                    <rect x="4" y="2" width="16" height="20" rx="2"/>
+                    <line x1="8" y1="6" x2="16" y2="6"/>
+                    <line x1="8" y1="10" x2="8" y2="10"/>
+                    <line x1="12" y1="10" x2="12" y2="10"/>
+                    <line x1="16" y1="10" x2="16" y2="10"/>
+                    <line x1="8" y1="14" x2="8" y2="14"/>
+                    <line x1="12" y1="14" x2="12" y2="14"/>
+                    <line x1="16" y1="14" x2="16" y2="14"/>
+                    <line x1="8" y1="18" x2="12" y2="18"/>
+                    <line x1="16" y1="18" x2="16" y2="18"/>
                 </svg>
                 <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Calculators</span>
             </a>

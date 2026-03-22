@@ -7,6 +7,7 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
+use App\Http\Controllers\CalculatorController;
 
 // ── Public Routes ────────────────────────────────────
 Route::get('/', fn() => redirect()->route('login'));
@@ -47,6 +48,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/profile',           [ProfileController::class, 'index'])->name('profile');
     Route::post('/profile/update',   [ProfileController::class, 'update'])->name('profile.update');
     Route::post('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password');
+
+    // Calculators
+    Route::middleware(['role:super_admin|team_member'])->group(function () {
+        Route::get('/calculators', [CalculatorController::class, 'index'])->name('calculators');
+    });
 
     // Customer dashboard
     Route::get('/customer/dashboard', fn() => view('dashboard.index'))->name('customer.dashboard');
