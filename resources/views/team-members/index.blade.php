@@ -333,10 +333,18 @@
                 </svg>
             </div>
             <h3 class="text-base font-extrabold text-dark mb-2">Delete Team Member?</h3>
-            <p class="text-sm text-crm-gray mb-6">
-                This will soft delete <strong id="deleteMemberName"></strong>.
-                Their data will be preserved and can be restored.
+            <p class="text-sm text-crm-gray mb-4">
+                Are you sure you want to delete <strong id="deleteMemberName"></strong>?
             </p>
+            <div class="bg-orange-50 border border-orange-200 rounded-input p-3 mb-6 text-left">
+                <p class="text-xs font-bold text-orange-600 mb-1">⚠️ What happens when deleted:</p>
+                <ul class="text-xs text-orange-600 space-y-1">
+                    <li>• Their assigned clients will be <strong>unassigned</strong></li>
+                    <li>• Their targets will be <strong>removed</strong></li>
+                    <li>• Their activities & conveyances are <strong>preserved</strong></li>
+                    <li>• This action can be <strong>restored</strong> by Super Admin</li>
+                </ul>
+            </div>
             <input type="hidden" id="deleteMemberId"/>
             <div class="flex gap-3">
                 <button onclick="confirmDelete()"

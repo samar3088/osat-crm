@@ -107,14 +107,33 @@ class TeamMemberService
     /**
      * Soft delete team member
      */
+    /**
+ * Soft delete team member + handle related data
+ */
     public function delete(User $user): void
     {
+        // 1. Unassign all clients assigned to this RM
+        //    Clients are NOT deleted — just unassigned
+        \App\Models\Client::where('assigned_to', $user->id)
+            ->update(['assigned_to' => null]);
+
+        // 2. Unassign service team clients
+        \App\Models\Client::where('service_team_id', $user->id)
+            ->update(['service_team_id' => null]);
+
+        // 3. Soft delete their targets
+        \App\Models\UserTarget::where('user_id', $user->id)
+            ->delete();
+
+        // 4. Log the action before deleting
         AuditLog::record(
             'deleted_team_member',
             'team_members',
-            "Deleted team member: {$user->name}"
+            "Deleted team member: {$user->name} (ID: {$user->id}). " .
+            "Clients unassigned, targets removed."
         );
 
+        // 5. Soft delete the user
         $user->delete();
     }
 
