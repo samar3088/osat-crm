@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\ProfileController;
 
 // ── Public Routes ────────────────────────────────────
 Route::get('/', fn() => redirect()->route('login'));
@@ -31,6 +32,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/today-birthdays',     [DashboardController::class, 'todayBirthdays'])->name('today-birthdays');
         Route::get('/today-meetings',      [DashboardController::class, 'todayMeetings'])->name('today-meetings');
     });
+
+    // ── Profile ──────────────────────────────────────
+    Route::get('/profile',           [ProfileController::class, 'index'])->name('profile');
+    Route::post('/profile/update',   [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/password', [ProfileController::class, 'changePassword'])->name('profile.password');
 
     // Customer dashboard
     Route::get('/customer/dashboard', fn() => view('dashboard.index'))->name('customer.dashboard');
