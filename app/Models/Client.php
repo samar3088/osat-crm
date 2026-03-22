@@ -35,6 +35,7 @@ class Client extends Model
         'created_by',
         'is_active',
         'date_first_added',
+        'date_of_birth',
     ];
 
     protected $casts = [
@@ -49,6 +50,7 @@ class Client extends Model
         'liquid'                    => 'decimal:2',
         'sip_amount'                => 'decimal:2',
         'lumpsum_amount'            => 'decimal:2',
+        'date_of_birth' => 'date',
     ];
 
     // ── Relationships ──────────────────────────
@@ -81,5 +83,10 @@ class Client extends Model
     public function aumSnapshots()
     {
         return $this->hasMany(ClientAumSnapshot::class);
+    }
+
+    public function meetings()
+    {
+        return $this->hasMany(Meeting::class);
     }
 }
