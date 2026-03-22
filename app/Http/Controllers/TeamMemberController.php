@@ -9,6 +9,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+use Illuminate\Validation\ValidationException;
+
 class TeamMemberController extends Controller
 {
     public function __construct(
@@ -65,6 +67,11 @@ class TeamMemberController extends Controller
                 'success' => true,
                 'message' => "Team member {$member->name} created successfully.",
             ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
@@ -100,6 +107,11 @@ class TeamMemberController extends Controller
                 'success' => true,
                 'message' => "Team member {$member->name} updated successfully.",
             ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'errors'  => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }

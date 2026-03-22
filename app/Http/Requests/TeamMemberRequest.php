@@ -13,8 +13,8 @@ class TeamMemberRequest extends FormRequest
 
     public function rules(): array
     {
-        // Get user ID for edit mode — null for create
-        $userId = $this->route('id') ?? $this->input('id');
+        // Get ID from route for edit mode
+        $userId = $this->route('teamMember')?->id;
 
         return [
             'name'          => ['required', 'string', 'min:3', 'max:100'],
@@ -31,18 +31,19 @@ class TeamMemberRequest extends FormRequest
                 'string',
                 'max:50',
                 $userId
-                    ? "unique:users,employee_code,{$userId}"  // Edit
-                    : 'unique:users,employee_code',            // Create
+                    ? "unique:users,employee_code,{$userId}"
+                    : 'unique:users,employee_code',
             ],
             'password'      => [
-                $userId ? 'nullable' : 'required',  // Optional on edit, required on create
+                $userId ? 'nullable' : 'required',   // Optional on edit
+                'nullable',
                 'string',
                 'min:8',
             ],
             'work_type'     => ['nullable', 'string', 'max:50'],
-            'is_active'     => ['nullable', 'boolean'],
+            'is_active'     => ['nullable'],
             'assigned_to'   => ['nullable', 'exists:users,id'],
-            'role' => ['required', 'string', 'in:team_member,customer'],
+            'role'          => ['nullable', 'string'],
         ];
     }
 
@@ -52,12 +53,10 @@ class TeamMemberRequest extends FormRequest
             'name.required'        => 'Full name is required.',
             'name.min'             => 'Name must be at least 3 characters.',
             'email.required'       => 'Email address is required.',
-            'email.unique'         => 'This email is already registered.',
+            'email.unique'         => 'This email is already registered by another user.',
             'employee_code.unique' => 'This employee code is already in use.',
             'password.required'    => 'Password is required for new team members.',
             'password.min'         => 'Password must be at least 8 characters.',
-            'role.required'        => 'Please select a role.',
-            'role.in'              => 'Invalid role selected.',
             'assigned_to.exists'   => 'Selected manager does not exist.',
         ];
     }

@@ -509,7 +509,7 @@ async function saveMember() {
 
     showLoader();
     try {
-        const res = await fetch(isEdit ? `/team-members/${id}` : '{{ route("team-members.store") }}', {
+        const response = await fetch(isEdit ? `/team-members/${id}` : '{{ route("team-members.store") }}', {
             method:  isEdit ? 'PUT' : 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -518,15 +518,24 @@ async function saveMember() {
             },
             body: JSON.stringify(payload),
         });
-        const data = await res.json();
+
+        const data = await response.json();
         hideLoader();
+
         if (data.success) {
             closeModal('memberModal');
             showToast(data.message, 'success');
             refreshTable();
         } else {
             document.getElementById('modalError').classList.remove('hidden');
-            document.getElementById('modalErrorText').textContent = data.message ?? 'Something went wrong.';
+            if (data.errors) {
+                const allErrors = Object.values(data.errors).flat();
+                document.getElementById('modalErrorText').innerHTML =
+                    allErrors.map(e => `• ${e}`).join('<br>');
+            } else {
+                document.getElementById('modalErrorText').textContent =
+                    data.message ?? 'Something went wrong.';
+            }
         }
     } catch (e) {
         hideLoader();
