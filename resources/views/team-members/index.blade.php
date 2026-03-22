@@ -315,13 +315,22 @@ let membersTable;
 $(document).ready(function() {
     membersTable = $('#membersTable').DataTable({
         ajax: {
-            url:  '{{ route("team-members.list") }}',
-            type: 'GET',
-            dataSrc: 'data',
+            url:      '{{ route("team-members.list") }}',
+            type:     'GET',
+            dataSrc:  'data',
+            beforeSend: function() {
+                showLoader();
+            },
+            complete: function() {
+                hideLoader();
+            },
             error: function() {
+                hideLoader();
                 showToast('Failed to load team members.', 'error');
             }
         },
+        processing:  false,  // hide default processing text
+        serverSide:  false,  // client-side processing
         columns: [
             {
                 data: null,
@@ -446,7 +455,7 @@ function togglePass(id) {
 }
 
 // ── Create Modal ─────────────────────────────────────
-function openCreateModal() {
+async function openCreateModal() {
     document.getElementById('modalTitle').textContent     = 'Add Team Member';
     document.getElementById('memberId').value             = '';
     document.getElementById('memberName').value           = '';
