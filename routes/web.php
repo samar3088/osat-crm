@@ -65,6 +65,11 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/team-members/{teamMember}/status',   [TeamMemberController::class, 'toggleStatus'])->name('team-members.toggle-status');
         Route::delete('/team-members/{teamMember}',         [TeamMemberController::class, 'destroy'])->name('team-members.destroy');
         Route::post('/team-members/{teamMember}/target',    [TeamMemberController::class, 'setTarget'])->name('team-members.set-target');
+
+        Route::get('/team-members/export/excel',   [TeamMemberController::class, 'exportExcel'])->name('team-members.export-excel');
+        Route::get('/team-members/export/pdf',     [TeamMemberController::class, 'exportPdf'])->name('team-members.export-pdf');
+        Route::get('/team-members/sample-target',  [TeamMemberController::class, 'downloadSampleTarget'])->name('team-members.sample-target');
+        Route::post('/team-members/upload-target', [TeamMemberController::class, 'uploadTarget'])->name('team-members.upload-target');
     });
 
     // Customer dashboard

@@ -21,6 +21,56 @@
                    class="crm-input pl-10 w-64"
                    placeholder="Search name / code..."/>
         </div>
+
+        {{-- Export Excel --}}
+        <a href="{{ route('team-members.export-excel') }}"
+           class="flex items-center gap-2 px-4 py-2.5 bg-green-50 text-green-600
+                  rounded-input text-sm font-bold hover:bg-green-100 transition-all border border-green-200">
+            <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Export Excel
+        </a>
+
+        {{-- Export PDF --}}
+        <a href="{{ route('team-members.export-pdf') }}"
+           class="flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-500
+                  rounded-input text-sm font-bold hover:bg-red-100 transition-all border border-red-200">
+            <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+            </svg>
+            Export PDF
+        </a>
+
+        {{-- Download Sample Target --}}
+        <a href="{{ route('team-members.sample-target') }}"
+           class="flex items-center gap-2 px-4 py-2.5 bg-primary-light text-primary
+                  rounded-input text-sm font-bold hover:bg-primary hover:text-white transition-all border border-primary/20">
+            <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="7 10 12 15 17 10"/>
+                <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Sample Target
+        </a>
+
+        {{-- Upload Target --}}
+        <button onclick="document.getElementById('targetFileInput').click()"
+                class="flex items-center gap-2 px-4 py-2.5 bg-orange-50 text-orange-500
+                       rounded-input text-sm font-bold hover:bg-orange-100 transition-all border border-orange-200">
+            <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                <polyline points="17 8 12 3 7 8"/>
+                <line x1="12" y1="3" x2="12" y2="15"/>
+            </svg>
+            Upload Target
+        </button>
+        <input type="file" id="targetFileInput" class="hidden"
+               accept=".xlsx,.csv" onchange="uploadTarget(this)"/>
     </div>
 
     {{-- Add Button --}}
@@ -655,6 +705,37 @@ async function confirmDelete() {
         hideLoader();
         showToast('Something went wrong.', 'error');
     }
+}
+
+async function uploadTarget(input) {
+    const file = input.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('_token', document.querySelector('meta[name=csrf-token]').content);
+
+    showLoader();
+    try {
+        const res  = await fetch('{{ route("team-members.upload-target") }}', {
+            method: 'POST',
+            body:   formData,
+        });
+        const data = await res.json();
+        hideLoader();
+
+        if (data.success) {
+            showToast(data.message, 'success');
+        } else {
+            showToast(data.message, 'error');
+        }
+    } catch (e) {
+        hideLoader();
+        showToast('Upload failed. Please try again.', 'error');
+    }
+
+    // Reset file input
+    input.value = '';
 }
 </script>
 @endpush

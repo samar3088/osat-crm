@@ -161,4 +161,63 @@ class TeamMemberController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Export team members to Excel
+     */
+    public function exportExcel(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\TeamMembersExport(),
+            'team-members-' . now()->format('Y-m-d') . '.xlsx'
+        );
+    }
+
+    /**
+     * Export team members to PDF
+     */
+    public function exportPdf(): \Illuminate\Http\Response
+    {
+        $members = $this->service->getAll();
+        $pdf     = \Barryvdh\DomPDF\Facade\Pdf::loadView('team-members.pdf', compact('members'));
+        return $pdf->download('team-members-' . now()->format('Y-m-d') . '.pdf');
+    }
+
+    /**
+     * Download sample target Excel
+     */
+    public function downloadSampleTarget(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\SampleTargetExport(),
+            'sample-target-upload.xlsx'
+        );
+    }
+
+    /**
+     * Upload target Excel
+     */
+    public function uploadTarget(Request $request): JsonResponse
+    {
+        $request->validate([
+            'file' => ['required', 'file', 'mimes:xlsx,csv', 'max:2048'],
+        ]);
+
+        try {
+            \Maatwebsite\Excel\Facades\Excel::import(
+                new \App\Imports\TargetImport(),
+                $request->file('file')
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Targets uploaded successfully!',
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Upload failed: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
 }
