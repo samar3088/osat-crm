@@ -128,6 +128,9 @@ function openCalculator(id) {
 function closeCalculator() {
     document.getElementById('calcModal').classList.add('hidden');
     document.body.style.overflow = '';
+    // Reset search
+    document.getElementById('calcSearch').value = '';
+    filterCalculators('');
 }
 
 // Close on backdrop click
@@ -171,8 +174,21 @@ function calcInput(id, label, placeholder, prefix='', suffix='') {
         </div>`;
 }
 
-function calcBtn(fn) {
-    return `<button onclick="${fn}" class="crm-btn-primary mt-2">Calculate</button>`;
+function calcBtn(calcFn, resultId) {
+    return `
+        <div class="flex gap-3 mt-2">
+            <button onclick="${calcFn}"
+                    class="crm-btn-primary flex-1">
+                Calculate
+            </button>
+            <button onclick="resetCalc('${resultId}')"
+                    class="flex-1 py-4 px-6 bg-crm-light text-crm-gray
+                           rounded-input border border-crm-border text-sm font-bold
+                           cursor-pointer transition-all duration-200
+                           hover:bg-crm-border hover:text-dark">
+                Reset
+            </button>
+        </div>`;
 }
 
 // ── Calculator HTML Definitions ───────────────────────
@@ -187,7 +203,7 @@ function getCalculatorHTML(id) {
             ${calcInput('sipAmount',    'Monthly Investment (₹)', '5000', '₹')}
             ${calcInput('sipRate',      'Expected Annual Return (%)', '12', '', '% p.a.')}
             ${calcInput('sipYears',     'Time Period', '10', '', 'Years')}
-            ${calcBtn('calcSIP()')}
+            ${calcBtn('calcSIP()', 'sipResult')}
             <div id="sipResult"></div>`;
 
         // ── Lumpsum ──────────────────────────────────
@@ -198,7 +214,7 @@ function getCalculatorHTML(id) {
             ${calcInput('lsAmount',  'Investment Amount (₹)', '100000', '₹')}
             ${calcInput('lsRate',    'Expected Annual Return (%)', '12', '', '% p.a.')}
             ${calcInput('lsYears',   'Time Period', '10', '', 'Years')}
-            ${calcBtn('calcLumpsum()')}
+            ${calcBtn('calcLumpsum()', 'lsResult')}
             <div id="lsResult"></div>`;
 
         // ── FD ───────────────────────────────────────
@@ -218,7 +234,7 @@ function getCalculatorHTML(id) {
                     <option value="12">Monthly</option>
                 </select>
             </div>
-            ${calcBtn('calcFD()')}
+            ${calcBtn('calcFD()', 'fdResult')}
             <div id="fdResult"></div>`;
 
         // ── Simple Interest ───────────────────────────
@@ -229,7 +245,7 @@ function getCalculatorHTML(id) {
             ${calcInput('siPrincipal', 'Principal Amount (₹)', '100000', '₹')}
             ${calcInput('siRate',      'Annual Interest Rate (%)', '8', '', '% p.a.')}
             ${calcInput('siYears',     'Time Period', '5', '', 'Years')}
-            ${calcBtn('calcSI()')}
+            ${calcBtn('calcSI()', 'siResult')}
             <div id="siResult"></div>`;
 
         // ── Compound Interest ─────────────────────────
@@ -249,7 +265,7 @@ function getCalculatorHTML(id) {
                     <option value="12">Monthly</option>
                 </select>
             </div>
-            ${calcBtn('calcCI()')}
+            ${calcBtn('calcCI()', 'ciResult')}
             <div id="ciResult"></div>`;
 
         // ── CAGR ──────────────────────────────────────
@@ -260,7 +276,7 @@ function getCalculatorHTML(id) {
             ${calcInput('cagrBegin',  'Beginning Value (₹)', '100000', '₹')}
             ${calcInput('cagrEnd',    'Ending Value (₹)', '200000', '₹')}
             ${calcInput('cagrYears',  'Number of Years', '5', '', 'Years')}
-            ${calcBtn('calcCAGR()')}
+            ${calcBtn('calcCAGR()', 'cagrResult')}
             <div id="cagrResult"></div>`;
 
         // ── Inflation ─────────────────────────────────
@@ -271,7 +287,7 @@ function getCalculatorHTML(id) {
             ${calcInput('inflAmount',  'Current Value (₹)', '100000', '₹')}
             ${calcInput('inflRate',    'Inflation Rate (%)', '6', '', '% p.a.')}
             ${calcInput('inflYears',   'Number of Years', '10', '', 'Years')}
-            ${calcBtn('calcInflation()')}
+            ${calcBtn('calcInflation()', 'inflResult')}
             <div id="inflResult"></div>`;
 
         default: return '<p class="text-sm text-crm-gray">Calculator not found.</p>';
@@ -403,5 +419,19 @@ function showCalcError(id) {
             <p class="text-xs text-red-600 font-semibold">Please fill in all fields correctly.</p>
         </div>`;
 }
+
+function resetCalc(resultId) {
+    // Clear result
+    document.getElementById(resultId).innerHTML = '';
+    // Clear all inputs in modal
+    document.querySelectorAll('#modalBody input[type="number"]').forEach(input => {
+        input.value = '';
+    });
+    // Reset selects to default
+    document.querySelectorAll('#modalBody select').forEach(select => {
+        select.selectedIndex = 0;
+    });
+}
+
 </script>
 @endpush
