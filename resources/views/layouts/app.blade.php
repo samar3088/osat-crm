@@ -115,9 +115,10 @@
             @endcan
 
             @can('view customers')
-            <a href="#"
+            <a href="{{ route('customers.index') }}"
             title="Customers"
-            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
+                    {{ request()->routeIs('customers.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>

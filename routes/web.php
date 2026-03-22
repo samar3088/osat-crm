@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\TeamMemberController;
+use App\Http\Controllers\CustomerController;
 
 // ── Public Routes ────────────────────────────────────
 Route::get('/', fn() => redirect()->route('login'));
@@ -74,5 +75,14 @@ Route::middleware(['auth'])->group(function () {
 
     // Customer dashboard
     Route::get('/customer/dashboard', fn() => view('dashboard.index'))->name('customer.dashboard');
+
+    Route::get('/customers',                        [CustomerController::class, 'index'])->name('customers.index');
+    Route::get('/customers/list',                   [CustomerController::class, 'list'])->name('customers.list');
+    Route::post('/customers',                       [CustomerController::class, 'store'])->name('customers.store');
+    Route::get('/customers/{customer}',             [CustomerController::class, 'show'])->name('customers.show');
+    Route::put('/customers/{customer}',             [CustomerController::class, 'update'])->name('customers.update');
+    Route::patch('/customers/{customer}/status',    [CustomerController::class, 'toggleStatus'])->name('customers.toggle-status');
+    Route::delete('/customers/{customer}',          [CustomerController::class, 'destroy'])->name('customers.destroy');
+    Route::get('/customers/{customer}/profile',     [CustomerController::class, 'profile'])->name('customers.profile');
 
 });
