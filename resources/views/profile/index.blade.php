@@ -5,7 +5,7 @@
 
 @section('content')
 
-<div class="max-w-4xl mx-auto">
+<div class="w-full">
 
     {{-- ═══ PROFILE HEADER CARD ═══ --}}
     <div class="bg-white rounded-card shadow-card overflow-hidden mb-6">
@@ -16,7 +16,7 @@
         </div>
 
         {{-- Avatar + Info --}}
-        <div class="px-6 pb-6">
+        <div class="px-6 pb-6 pt-14">
             
             {{-- Avatar + Info + Stats in one row --}}
             <div class="flex items-end justify-between -mt-10 mb-4 flex-wrap gap-4">
@@ -30,7 +30,7 @@
                         </span>
                     </div>
                     <div class="pb-2">
-                        <h2 class="text-xl font-extrabold text-dark">{{ $user->name }}</h2>
+                    <h2 class="text-xl font-extrabold text-dark leading-tight">{{ $user->name }}</h2>
                         <div class="flex items-center gap-2 mt-1 flex-wrap">
                             <span class="text-xs font-bold px-3 py-1 rounded-full bg-primary-light text-primary capitalize">
                                 {{ str_replace('_', ' ', $user->getRoleNames()->first() ?? 'User') }}

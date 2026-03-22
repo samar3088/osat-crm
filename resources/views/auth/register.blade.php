@@ -1,4 +1,4 @@
-<x-layouts.auth title="Create Account — Investment CRM">
+<x-layouts.auth title="Create Account — OSAT Wealth CRM">
 
     {{-- ═══ LEFT PANEL ═══ --}}
     <x-slot:left>
@@ -18,7 +18,7 @@
                         <path d="M2 12l10 5 10-5"/>
                     </svg>
                 </div>
-                <div class="text-2xl font-extrabold text-white">Investment CRM</div>
+                <div class="text-2xl font-extrabold text-white">OSAT Wealth CRM</div>
                 <div class="text-xs text-white/65 mt-1 font-medium">Your Ultimate Wealth Partner</div>
             </div>
 

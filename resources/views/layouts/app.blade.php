@@ -4,7 +4,7 @@
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>{{ $title ?? 'Dashboard' }} — Investment CRM</title>
+    <title>{{ $title ?? 'Dashboard' }} — OSAT Wealth CRM</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 </head>
@@ -41,7 +41,7 @@
                 </svg>
             </div>
             <div id="sidebarLogoText">
-                <div class="text-sm font-extrabold text-white leading-tight whitespace-nowrap">Investment CRM</div>
+                <div class="text-sm font-extrabold text-white leading-tight whitespace-nowrap">OSAT Wealth CRM</div>
                 <div class="text-[10px] text-white/40 font-medium whitespace-nowrap">Wealth Management</div>
             </div>
 
@@ -168,16 +168,6 @@
             @can('manage settings')
             <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Admin</div>
 
-            {{-- Settings --}}
-            <a href="#"
-            title="Settings"
-            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
-                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="3"/>
-                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-                </svg>
-                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Settings</span>
-            </a>
 
             {{-- Audit Logs --}}
             <a href="#"
