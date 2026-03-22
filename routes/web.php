@@ -8,6 +8,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CalculatorController;
+use App\Http\Controllers\TeamMemberController;
 
 // ── Public Routes ────────────────────────────────────
 Route::get('/', fn() => redirect()->route('login'));
@@ -52,6 +53,18 @@ Route::middleware(['auth'])->group(function () {
     // Calculators
     Route::middleware(['role:super_admin|team_member'])->group(function () {
         Route::get('/calculators', [CalculatorController::class, 'index'])->name('calculators');
+    });
+
+    // Team Members — Super Admin only
+    Route::middleware(['role:super_admin'])->group(function () {
+        Route::get('/team-members',                         [TeamMemberController::class, 'index'])->name('team-members.index');
+        Route::get('/team-members/list',                    [TeamMemberController::class, 'list'])->name('team-members.list');
+        Route::post('/team-members',                        [TeamMemberController::class, 'store'])->name('team-members.store');
+        Route::get('/team-members/{teamMember}',            [TeamMemberController::class, 'show'])->name('team-members.show');
+        Route::put('/team-members/{teamMember}',            [TeamMemberController::class, 'update'])->name('team-members.update');
+        Route::patch('/team-members/{teamMember}/status',   [TeamMemberController::class, 'toggleStatus'])->name('team-members.toggle-status');
+        Route::delete('/team-members/{teamMember}',         [TeamMemberController::class, 'destroy'])->name('team-members.destroy');
+        Route::post('/team-members/{teamMember}/target',    [TeamMemberController::class, 'setTarget'])->name('team-members.set-target');
     });
 
     // Customer dashboard
