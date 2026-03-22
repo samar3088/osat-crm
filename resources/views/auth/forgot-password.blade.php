@@ -1,4 +1,4 @@
-<x-layouts.auth title="Forgot Password — Investment CRM">
+<x-layouts.auth title="Forgot Password — OSAT Wealth CRM">
 
     {{-- ═══ LEFT PANEL ═══ --}}
     <x-slot:left>
@@ -56,7 +56,7 @@
                 </svg>
             </div>
             <div>
-                <div class="text-lg font-extrabold text-dark">Investment CRM</div>
+                <div class="text-lg font-extrabold text-dark">OSAT Wealth CRM</div>
                 <div class="text-[11px] text-crm-gray font-medium">Your Ultimate Wealth Partner</div>
             </div>
         </div>
