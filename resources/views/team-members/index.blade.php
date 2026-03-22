@@ -451,7 +451,7 @@ function openCreateModal() {
     document.getElementById('memberId').value             = '';
     document.getElementById('memberName').value           = '';
     document.getElementById('memberEmail').value          = '';
-    document.getElementById('memberEmpCode').value        = '';
+    document.getElementById('memberEmpCode').value = await generateEmpCode();
     document.getElementById('memberPassword').value       = '';
     document.getElementById('memberWorkType').value       = 'Sales';
     document.getElementById('memberAssignedTo').value     = '';
@@ -631,6 +631,12 @@ async function uploadTarget(input) {
         else showToast(data.message, 'error');
     } catch(e) { hideLoader(); showToast('Upload failed.', 'error'); }
     input.value = '';
+}
+
+// ── Auto Generate Employee Code ───────────────────────
+async function generateEmpCode() {
+    const res = await ajaxGet('{{ route("team-members.generate-code") }}');
+    return res.success ? res.code : '';
 }
 </script>
 @endpush

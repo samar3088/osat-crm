@@ -69,6 +69,7 @@ Route::middleware(['auth'])->group(function () {
         // Keep server-side target upload
         Route::get('/team-members/sample-target',          [TeamMemberController::class, 'downloadSampleTarget'])->name('team-members.sample-target');
         Route::post('/team-members/upload-target',         [TeamMemberController::class, 'uploadTarget'])->name('team-members.upload-target');
+        Route::get('/team-members/generate-code', [TeamMemberController::class, 'generateCode'])->name('team-members.generate-code');
     });
 
     // Customer dashboard

@@ -202,4 +202,26 @@ class TeamMemberController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Generate unique employee code
+     */
+    public function generateCode(): JsonResponse
+    {
+        $last = User::whereNotNull('employee_code')
+            ->orderByDesc('id')
+            ->value('employee_code');
+
+        // Extract number from last code e.g. EMP-001 → 1
+        $lastNum = $last ? (int) filter_var($last, FILTER_SANITIZE_NUMBER_INT) : 0;
+        $newCode = 'EMP-' . str_pad($lastNum + 1, 3, '0', STR_PAD_LEFT);
+
+        // Ensure uniqueness
+        while (User::where('employee_code', $newCode)->exists()) {
+            $lastNum++;
+            $newCode = 'EMP-' . str_pad($lastNum, 3, '0', STR_PAD_LEFT);
+        }
+
+        return response()->json(['success' => true, 'code' => $newCode]);
+    }
 }
