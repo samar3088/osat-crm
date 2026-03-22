@@ -57,19 +57,18 @@ Route::middleware(['auth'])->group(function () {
 
     // Team Members — Super Admin only
     Route::middleware(['role:super_admin'])->group(function () {
-        Route::get('/team-members',                         [TeamMemberController::class, 'index'])->name('team-members.index');
-        Route::get('/team-members/list',                    [TeamMemberController::class, 'list'])->name('team-members.list');
-        Route::post('/team-members',                        [TeamMemberController::class, 'store'])->name('team-members.store');
-        Route::get('/team-members/{teamMember}',            [TeamMemberController::class, 'show'])->name('team-members.show');
-        Route::put('/team-members/{teamMember}',            [TeamMemberController::class, 'update'])->name('team-members.update');
-        Route::patch('/team-members/{teamMember}/status',   [TeamMemberController::class, 'toggleStatus'])->name('team-members.toggle-status');
-        Route::delete('/team-members/{teamMember}',         [TeamMemberController::class, 'destroy'])->name('team-members.destroy');
-        Route::post('/team-members/{teamMember}/target',    [TeamMemberController::class, 'setTarget'])->name('team-members.set-target');
-
-        Route::get('/team-members/export/excel',   [TeamMemberController::class, 'exportExcel'])->name('team-members.export-excel');
-        Route::get('/team-members/export/pdf',     [TeamMemberController::class, 'exportPdf'])->name('team-members.export-pdf');
-        Route::get('/team-members/sample-target',  [TeamMemberController::class, 'downloadSampleTarget'])->name('team-members.sample-target');
-        Route::post('/team-members/upload-target', [TeamMemberController::class, 'uploadTarget'])->name('team-members.upload-target');
+        Route::get('/team-members',                        [TeamMemberController::class, 'index'])->name('team-members.index');
+        Route::get('/team-members/list',                   [TeamMemberController::class, 'list'])->name('team-members.list');
+        Route::post('/team-members',                       [TeamMemberController::class, 'store'])->name('team-members.store');
+        Route::get('/team-members/{teamMember}',           [TeamMemberController::class, 'show'])->name('team-members.show');
+        Route::put('/team-members/{teamMember}',           [TeamMemberController::class, 'update'])->name('team-members.update');
+        Route::patch('/team-members/{teamMember}/status',  [TeamMemberController::class, 'toggleStatus'])->name('team-members.toggle-status');
+        Route::delete('/team-members/{teamMember}',        [TeamMemberController::class, 'destroy'])->name('team-members.destroy');
+        Route::post('/team-members/{teamMember}/target',   [TeamMemberController::class, 'setTarget'])->name('team-members.set-target');
+    
+        // Keep server-side target upload
+        Route::get('/team-members/sample-target',          [TeamMemberController::class, 'downloadSampleTarget'])->name('team-members.sample-target');
+        Route::post('/team-members/upload-target',         [TeamMemberController::class, 'uploadTarget'])->name('team-members.upload-target');
     });
 
     // Customer dashboard

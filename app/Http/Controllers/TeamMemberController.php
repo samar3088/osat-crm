@@ -30,22 +30,25 @@ class TeamMemberController extends Controller
     public function list(Request $request): JsonResponse
     {
         try {
-            $members = $this->service->getAll($request->search ?? '');
+            $members = User::role('team_member')
+                ->with('assignedTo')
+                ->withCount('clients')
+                ->latest()
+                ->get()
+                ->map(fn($m, $i) => [
+                    'id'             => $m->id,
+                    'name'           => $m->name,
+                    'email'          => $m->email,
+                    'employee_code'  => $m->employee_code ?? '—',
+                    'work_type'      => $m->work_type,
+                    'assigned_to'    => $m->assignedTo?->name ?? '—',
+                    'assigned_to_id' => $m->assigned_to,
+                    'clients_count'  => $m->clients_count,
+                    'is_active'      => $m->is_active,
+                    'created_at'     => $m->created_at->format('d M Y'),
+                ]);
 
-            $data = $members->map(fn($m) => [
-                'id'            => $m->id,
-                'name'          => $m->name,
-                'email'         => $m->email,
-                'employee_code' => $m->employee_code ?? '—',
-                'work_type'     => $m->work_type,
-                'assigned_to'   => $m->assignedTo?->name ?? '—',
-                'assigned_to_id'=> $m->assigned_to,
-                'clients_count' => $m->clients_count,
-                'is_active'     => $m->is_active,
-                'created_at'    => $m->created_at->format('d M Y'),
-            ]);
-
-            return response()->json(['success' => true, 'data' => $data]);
+            return response()->json(['success' => true, 'data' => $members]);
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
@@ -160,27 +163,6 @@ class TeamMemberController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
-    }
-
-    /**
-     * Export team members to Excel
-     */
-    public function exportExcel(): \Symfony\Component\HttpFoundation\BinaryFileResponse
-    {
-        return \Maatwebsite\Excel\Facades\Excel::download(
-            new \App\Exports\TeamMembersExport(),
-            'team-members-' . now()->format('Y-m-d') . '.xlsx'
-        );
-    }
-
-    /**
-     * Export team members to PDF
-     */
-    public function exportPdf(): \Illuminate\Http\Response
-    {
-        $members = $this->service->getAll();
-        $pdf     = \Barryvdh\DomPDF\Facade\Pdf::loadView('team-members.pdf', compact('members'));
-        return $pdf->download('team-members-' . now()->format('Y-m-d') . '.pdf');
     }
 
     /**

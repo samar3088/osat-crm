@@ -4,32 +4,10 @@ namespace App\Services;
 
 use App\Models\User;
 use App\Models\UserTarget;
-use Illuminate\Support\Facades\Hash;
 use App\Models\AuditLog;
 
 class TeamMemberService
 {
-    /**
-     * Get all team members — scoped by role
-     * DRY: reused in controller and AJAX
-     */
-    public function getAll(string $search = ''): \Illuminate\Database\Eloquent\Collection
-    {
-        $query = User::role('team_member')
-            ->with(['assignedTo', 'targets'])
-            ->withCount('clients');
-
-        if ($search) {
-            $query->where(function($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                  ->orWhere('employee_code', 'like', "%{$search}%")
-                  ->orWhere('email', 'like', "%{$search}%");
-            });
-        }
-
-        return $query->latest()->get();
-    }
-
     /**
      * Create a new team member
      */
