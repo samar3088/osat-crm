@@ -82,11 +82,13 @@
         <nav class="flex-1 px-3 py-4 overflow-y-auto">
 
             {{-- Main --}}
-            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 sidebar-text">Main</div>
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 sidebar-text sidebar-section">Main</div>
 
+            {{-- Dashboard --}}
             <a href="{{ route('dashboard') }}"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                      {{ request()->routeIs('dashboard') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
+            title="Dashboard"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
+                    {{ request()->routeIs('dashboard') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
                     <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
@@ -95,11 +97,12 @@
             </a>
 
             {{-- Management --}}
-            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text">Management</div>
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Management</div>
 
             @can('view users')
             <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            title="Team Members"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
                     <circle cx="9" cy="7" r="4"/>
@@ -112,7 +115,8 @@
 
             @can('view customers')
             <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            title="Customers"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
                     <circle cx="12" cy="7" r="4"/>
@@ -123,7 +127,8 @@
 
             @can('view activities')
             <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            title="Activities"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
                 </svg>
@@ -133,10 +138,12 @@
 
             @can('view conveyance')
             <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            title="Conveyance"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <rect x="1" y="3" width="15" height="13"/>
-                    <path d="M16 8h4l3 3v5h-7V8z"/><circle cx="5.5" cy="18.5" r="2.5"/>
+                    <path d="M16 8h4l3 3v5h-7V8z"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/>
                     <circle cx="18.5" cy="18.5" r="2.5"/>
                 </svg>
                 <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Conveyance</span>
@@ -144,27 +151,28 @@
             @endcan
 
             {{-- Reports --}}
-            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text">Reports</div>
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Reports</div>
 
             @can('view reports')
             <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            title="Reports"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                     <polyline points="14 2 14 8 20 8"/>
                     <line x1="16" y1="13" x2="8" y2="13"/>
                     <line x1="16" y1="17" x2="8" y2="17"/>
-                    <polyline points="10 9 9 9 8 9"/>
                 </svg>
                 <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Reports</span>
             </a>
             @endcan
 
             {{-- Tools --}}
-            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text">Tools</div>
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Tools</div>
 
             <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            title="Calculators"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <rect x="2" y="3" width="20" height="14" rx="2" ry="2"/>
                     <line x1="8" y1="21" x2="16" y2="21"/>
@@ -175,10 +183,12 @@
 
             {{-- Admin Only --}}
             @can('manage settings')
-            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text">Admin</div>
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Admin</div>
 
+            {{-- Settings --}}
             <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            title="Settings"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <circle cx="12" cy="12" r="3"/>
                     <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
@@ -186,8 +196,10 @@
                 <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Settings</span>
             </a>
 
+            {{-- Audit Logs --}}
             <a href="#"
-               class="flex items-center gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
+            title="Audit Logs"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all text-white/60 hover:bg-white/[0.07] hover:text-white">
                 <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
                 </svg>
@@ -337,36 +349,53 @@
         const logoText     = document.getElementById('sidebarLogoText');
         const userInfo     = document.getElementById('sidebarUserInfo');
         const sidebarTexts = document.querySelectorAll('.sidebar-text');
+        const navLinks     = document.querySelectorAll('.nav-link');
+        const sectionLabels = document.querySelectorAll('.sidebar-section');
 
         sidebarOpen = !sidebarOpen;
 
         if (sidebarOpen) {
-            // Expand
-            sidebar.style.width      = '260px';
+            // ── Expand ──
+            sidebar.style.width          = '260px';
             mainContent.style.marginLeft = '260px';
-            arrow.style.transform    = 'rotate(0deg)';
+            arrow.style.transform        = 'rotate(0deg)';
             logoText.classList.remove('hidden');
             userInfo.classList.remove('hidden');
-            sidebarTexts.forEach(el => el.classList.remove('hidden'));
+            sidebarTexts.forEach(el => {
+                el.classList.remove('hidden');
+                el.classList.remove('opacity-0');
+            });
+            sectionLabels.forEach(el => el.classList.remove('hidden'));
+            navLinks.forEach(el => {
+                el.classList.remove('justify-center');
+                el.classList.add('justify-start');
+            });
         } else {
-            // Collapse — icon only
-            sidebar.style.width      = '70px';
+            // ── Collapse ──
+            sidebar.style.width          = '70px';
             mainContent.style.marginLeft = '70px';
-            arrow.style.transform    = 'rotate(180deg)';
+            arrow.style.transform        = 'rotate(180deg)';
             logoText.classList.add('hidden');
             userInfo.classList.add('hidden');
-            sidebarTexts.forEach(el => el.classList.add('hidden'));
+            sidebarTexts.forEach(el => {
+                el.classList.add('hidden');
+                el.classList.add('opacity-0');
+            });
+            sectionLabels.forEach(el => el.classList.add('hidden'));
+            navLinks.forEach(el => {
+                el.classList.add('justify-center');
+                el.classList.remove('justify-start');
+            });
         }
 
-        // Save state in localStorage
         localStorage.setItem('sidebarOpen', sidebarOpen);
     }
 
-    // Restore sidebar state on page load
+    // Restore on page load
     document.addEventListener('DOMContentLoaded', () => {
         const saved = localStorage.getItem('sidebarOpen');
         if (saved === 'false') {
-            sidebarOpen = true; // force toggle
+            sidebarOpen = true;
             toggleSidebar();
         }
     });
