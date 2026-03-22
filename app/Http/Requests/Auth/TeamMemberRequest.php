@@ -42,7 +42,7 @@ class TeamMemberRequest extends FormRequest
             'work_type'     => ['nullable', 'string', 'max:50'],
             'is_active'     => ['nullable', 'boolean'],
             'assigned_to'   => ['nullable', 'exists:users,id'],
-            'role'          => ['required', 'string', 'in:team_member,sub_admin,operations_admin,viewer'],
+            'role' => ['required', 'string', 'in:team_member,customer'],
         ];
     }
 

@@ -8,7 +8,7 @@ class RegisterRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Controller will handle the logic
+        return true;
     }
 
     public function rules(): array
@@ -19,14 +19,14 @@ class RegisterRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:20',
-                'unique:users,employee_code', // 👈 no duplicate employee codes
+                'unique:users,employee_code',
             ],
             'email'         => [
                 'required',
                 'string',
                 'email',
                 'max:255',
-                'unique:users,email', // 👈 no duplicate emails
+                'unique:users,email',
             ],
             'password'      => ['required', 'string', 'min:8', 'confirmed'],
             'terms'         => ['accepted'],
@@ -44,19 +44,6 @@ class RegisterRequest extends FormRequest
             'password.min'           => 'Password must be at least 8 characters.',
             'password.confirmed'     => 'Passwords do not match.',
             'terms.accepted'         => 'You must accept the Terms of Service.',
-        ];
-    }
-
-    public function messages(): array
-    {
-        return [
-            'name.required'     => 'Full name is required.',
-            'name.min'          => 'Name must be at least 3 characters.',
-            'email.required'    => 'Email address is required.',
-            'email.unique'      => 'This email is already registered.',
-            'password.min'      => 'Password must be at least 8 characters.',
-            'password.confirmed'=> 'Passwords do not match.',
-            'terms.accepted'    => 'You must accept the Terms of Service.',
         ];
     }
 }

@@ -10,11 +10,9 @@ class RoleSeeder extends Seeder
 {
     public function run(): void
     {
-        // Reset cached roles and permissions
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // ── Create Permissions ──────────────────────────
-
+        // ── Permissions ────────────────────────────────
         $permissions = [
             // User management
             'view users',
@@ -44,7 +42,7 @@ class RoleSeeder extends Seeder
             'view reports',
             'export reports',
 
-            // Settings
+            // Settings & Admin
             'manage settings',
             'manage roles',
         ];
@@ -53,13 +51,11 @@ class RoleSeeder extends Seeder
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // ── Create Roles & Assign Permissions ───────────
-
-        // 1. Super Admin — gets ALL permissions
+        // ── 1. Super Admin — ALL permissions ──────────
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
         $superAdmin->syncPermissions(Permission::all());
 
-        // 2. Team Member / RM — limited permissions
+        // ── 2. Team Member / RM ───────────────────────
         $teamMember = Role::firstOrCreate(['name' => 'team_member']);
         $teamMember->syncPermissions([
             'view customers',
@@ -73,13 +69,13 @@ class RoleSeeder extends Seeder
             'view reports',
         ]);
 
-        // 3. Customer — minimal permissions
+        // ── 3. Customer ───────────────────────────────
         $customer = Role::firstOrCreate(['name' => 'customer']);
         $customer->syncPermissions([
-            'view customers', // only own profile (scoped in controller)
-            'view reports',   // only own reports (scoped in controller)
+            'view customers',  // own profile only — scoped in controller
+            'view reports',    // own reports only — scoped in controller
         ]);
 
-        $this->command->info('✅ Roles and permissions seeded successfully!');
+        $this->command->info('✅ 3 Roles seeded: super_admin, team_member, customer');
     }
 }
