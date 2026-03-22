@@ -61,23 +61,6 @@
             </button>
         </div>
 
-        {{-- User Info --}}
-        <div id="sidebarUserInfo" class="px-5 py-4 border-b border-white/[0.07]">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full bg-primary/30 flex items-center justify-center flex-shrink-0">
-                    <span class="text-sm font-bold text-white">
-                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
-                    </span>
-                </div>
-                <div class="overflow-hidden">
-                    <div class="text-sm font-bold text-white truncate">{{ auth()->user()->name }}</div>
-                    <div class="text-[10px] text-white/40 capitalize">
-                        {{ str_replace('_', ' ', auth()->user()->getRoleNames()->first() ?? 'User') }}
-                    </div>
-                </div>
-            </div>
-        </div>
-
         {{-- Navigation --}}
         <nav class="flex-1 px-3 py-4 overflow-y-auto">
 
@@ -207,24 +190,7 @@
             </a>
             @endcan
 
-        </nav>
-
-        {{-- Logout --}}
-        <div class="px-3 py-4 border-t border-white/[0.07]">
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-                <button type="submit"
-                        class="w-full flex items-center gap-3 px-3 py-2.5 rounded-[10px]
-                               text-white/60 hover:bg-red-500/10 hover:text-red-400 transition-all">
-                    <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                        <polyline points="16 17 21 12 16 7"/>
-                        <line x1="21" y1="12" x2="9" y2="12"/>
-                    </svg>
-                    <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Logout</span>
-                </button>
-            </form>
-        </div>
+        </nav>        
 
     </aside>
 
@@ -233,27 +199,150 @@
 
         {{-- Top Header --}}
         <header class="h-[68px] bg-white border-b border-crm-border flex items-center justify-between px-6 sticky top-0 z-40">
+
+            {{-- Left: Page Title --}}
             <div>
                 <h1 class="text-base font-extrabold text-dark">@yield('page-title', 'Dashboard')</h1>
                 <p class="text-xs text-crm-gray">@yield('page-subtitle', 'Welcome back, ' . auth()->user()->name)</p>
             </div>
-            <div class="flex items-center gap-4">
+
+            {{-- Right: Notification + Profile Dropdown --}}
+            <div class="flex items-center gap-3">
+
+                {{-- Date --}}
+                <div class="text-xs text-crm-gray font-medium hidden md:block">
+                    {{ now()->format('d M Y') }}
+                </div>
+
                 {{-- Notification Bell --}}
                 <button class="relative w-9 h-9 rounded-[10px] bg-crm-light flex items-center justify-center hover:bg-primary-light transition-all">
                     <svg class="w-4 h-4 stroke-crm-gray fill-none stroke-2" viewBox="0 0 24 24">
                         <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
                         <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
                     </svg>
-                    {{-- Unread badge --}}
                     <span id="notifBadge"
-                          class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-[9px] text-white font-bold flex items-center justify-center">
+                        class="hidden absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full
+                                text-[9px] text-white font-bold flex items-center justify-center">
                     </span>
                 </button>
 
-                {{-- Date --}}
-                <div class="text-xs text-crm-gray font-medium hidden md:block">
-                    {{ now()->format('d M Y') }}
+                {{-- Profile Dropdown --}}
+                <div class="relative" id="profileDropdownWrap">
+
+                    {{-- Trigger Button --}}
+                    <button onclick="toggleProfileDropdown()"
+                            class="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-[10px]
+                                hover:bg-crm-light transition-all border border-transparent
+                                hover:border-crm-border">
+                        {{-- Avatar --}}
+                        <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                            <span class="text-xs font-extrabold text-white">
+                                {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                            </span>
+                        </div>
+                        {{-- Name + Role --}}
+                        <div class="hidden md:block text-left">
+                            <div class="text-xs font-bold text-dark leading-tight">
+                                {{ auth()->user()->name }}
+                            </div>
+                            <div class="text-[10px] text-crm-gray capitalize leading-tight">
+                                {{ str_replace('_', ' ', auth()->user()->getRoleNames()->first() ?? 'User') }}
+                            </div>
+                        </div>
+                        {{-- Chevron --}}
+                        <svg id="dropdownChevron"
+                            class="w-3.5 h-3.5 stroke-crm-gray fill-none stroke-2 transition-transform duration-200"
+                            viewBox="0 0 24 24">
+                            <polyline points="6 9 12 15 18 9"/>
+                        </svg>
+                    </button>
+
+                    {{-- Dropdown Menu --}}
+                    <div id="profileDropdown"
+                        class="hidden absolute right-0 top-full mt-2 w-56 bg-white rounded-card
+                                shadow-card border border-crm-border z-50 overflow-hidden">
+
+                        {{-- User Info Header --}}
+                        <div class="px-4 py-3 border-b border-crm-border bg-crm-light">
+                            <div class="flex items-center gap-3">
+                                <div class="w-9 h-9 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
+                                    <span class="text-sm font-extrabold text-white">
+                                        {{ strtoupper(substr(auth()->user()->name, 0, 1)) }}
+                                    </span>
+                                </div>
+                                <div class="overflow-hidden">
+                                    <div class="text-sm font-bold text-dark truncate">
+                                        {{ auth()->user()->name }}
+                                    </div>
+                                    <div class="text-[10px] text-crm-gray truncate">
+                                        {{ auth()->user()->email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Menu Items --}}
+                        <div class="py-1">
+                            {{-- My Profile --}}
+                            <a href="{{ route('profile') }}"
+                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-dark
+                                    hover:bg-primary-light hover:text-primary transition-all">
+                                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                                    <circle cx="12" cy="7" r="4"/>
+                                </svg>
+                                <span class="font-semibold">My Profile</span>
+                            </a>
+
+                            {{-- Change Password --}}
+                            <a href="{{ route('profile') }}#change-password"
+                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-dark
+                                    hover:bg-primary-light hover:text-primary transition-all">
+                                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                                    <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                                    <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                                </svg>
+                                <span class="font-semibold">Change Password</span>
+                            </a>
+
+                            @can('manage settings')
+                            {{-- Settings --}}
+                            <a href="#"
+                            class="flex items-center gap-3 px-4 py-2.5 text-sm text-dark
+                                    hover:bg-primary-light hover:text-primary transition-all">
+                                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                                </svg>
+                                <span class="font-semibold">Settings</span>
+                            </a>
+                            @endcan
+                        </div>
+
+                        {{-- Divider --}}
+                        <div class="border-t border-crm-border"></div>
+
+                        {{-- Logout --}}
+                        <div class="py-1">
+                            <form method="POST" action="{{ route('logout') }}">
+                                @csrf
+                                <button type="submit"
+                                        class="w-full flex items-center gap-3 px-4 py-2.5 text-sm
+                                            text-red-500 hover:bg-red-50 transition-all">
+                                    <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                                        <polyline points="16 17 21 12 16 7"/>
+                                        <line x1="21" y1="12" x2="9" y2="12"/>
+                                    </svg>
+                                    <span class="font-semibold">Logout</span>
+                                </button>
+                            </form>
+                        </div>
+
+                    </div>
                 </div>
+                {{-- End Profile Dropdown --}}
+
             </div>
         </header>
 
@@ -268,6 +357,26 @@
 
 {{-- Global JS --}}
 <script>
+
+    // ── Profile Dropdown ─────────────────────────────────
+    function toggleProfileDropdown() {
+        const dropdown = document.getElementById('profileDropdown');
+        const chevron  = document.getElementById('dropdownChevron');
+        const isHidden = dropdown.classList.contains('hidden');
+
+        dropdown.classList.toggle('hidden', !isHidden);
+        chevron.style.transform = isHidden ? 'rotate(180deg)' : 'rotate(0deg)';
+    }
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        const wrap = document.getElementById('profileDropdownWrap');
+        if (wrap && !wrap.contains(e.target)) {
+            document.getElementById('profileDropdown').classList.add('hidden');
+            document.getElementById('dropdownChevron').style.transform = 'rotate(0deg)';
+        }
+    });
+
     // ── Loader ──────────────────────────────────
     window.showLoader = () => document.getElementById('globalLoader').classList.remove('hidden');
     window.hideLoader = () => document.getElementById('globalLoader').classList.add('hidden');
