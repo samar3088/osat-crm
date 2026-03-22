@@ -28,6 +28,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/aum-trend',           [DashboardController::class, 'aumTrend'])->name('aum-trend');
         Route::get('/recent-activities',   [DashboardController::class, 'recentActivities'])->name('recent-activities');
         Route::get('/pending-conveyances', [DashboardController::class, 'pendingConveyances'])->name('pending-conveyances');
+        Route::get('/today-birthdays',     [DashboardController::class, 'todayBirthdays'])->name('today-birthdays');
+        Route::get('/today-meetings',      [DashboardController::class, 'todayMeetings'])->name('today-meetings');
     });
 
     // Customer dashboard

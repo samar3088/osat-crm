@@ -85,4 +85,30 @@ class DashboardController extends Controller
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
+
+    /**
+     * AJAX — Get today's birthdays
+     */
+    public function todayBirthdays(): JsonResponse
+    {
+        try {
+            $data = $this->dashboardService->getTodayBirthdays();
+            return response()->json(['success' => true, 'data' => $data]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * AJAX — Get today's meetings
+     */
+    public function todayMeetings(): JsonResponse
+    {
+        try {
+            $data = $this->dashboardService->getTodayMeetings();
+            return response()->json(['success' => true, 'data' => $data]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
 }

@@ -169,6 +169,72 @@
 
 </div>
 
+{{-- ═══ BIRTHDAYS + MEETINGS ROW ═══ --}}
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 mb-6">
+
+    {{-- 🎂 Today's Birthdays --}}
+    <div class="bg-white rounded-card p-6 shadow-card">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 class="text-sm font-extrabold text-dark">🎂 Birthdays Today</h3>
+                <p class="text-xs text-crm-gray mt-0.5">{{ now()->format('d F Y') }}</p>
+            </div>
+            <div class="w-8 h-8 rounded-[8px] flex items-center justify-center"
+                 style="background:#fff0f6">
+                <svg class="w-4 h-4 fill-none stroke-2" style="stroke:#ec4899" viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+            </div>
+        </div>
+        <div id="birthdaysList" class="space-y-3">
+            {{-- Skeleton --}}
+            @foreach(range(1,3) as $i)
+            <div class="flex items-center gap-3 p-3 rounded-[10px] bg-crm-light animate-pulse">
+                <div class="w-8 h-8 rounded-full bg-crm-border flex-shrink-0"></div>
+                <div class="flex-1 space-y-1.5">
+                    <div class="h-3 bg-crm-border rounded w-3/4"></div>
+                    <div class="h-2.5 bg-crm-border rounded w-1/2"></div>
+                </div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+    {{-- 📅 Today's Meetings --}}
+    <div class="bg-white rounded-card p-6 shadow-card">
+        <div class="flex items-center justify-between mb-5">
+            <div>
+                <h3 class="text-sm font-extrabold text-dark">📅 Today's Meetings</h3>
+                <p class="text-xs text-crm-gray mt-0.5">{{ now()->format('d F Y') }}</p>
+            </div>
+            <div class="w-8 h-8 rounded-[8px] flex items-center justify-center"
+                 style="background:#eff6ff">
+                <svg class="w-4 h-4 fill-none stroke-2" style="stroke:#3b82f6" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+            </div>
+        </div>
+        <div id="meetingsList" class="space-y-3">
+            {{-- Skeleton --}}
+            @foreach(range(1,3) as $i)
+            <div class="flex items-center gap-3 p-3 rounded-[10px] bg-crm-light animate-pulse">
+                <div class="w-8 h-8 rounded-full bg-crm-border flex-shrink-0"></div>
+                <div class="flex-1 space-y-1.5">
+                    <div class="h-3 bg-crm-border rounded w-3/4"></div>
+                    <div class="h-2.5 bg-crm-border rounded w-1/2"></div>
+                </div>
+                <div class="h-3 bg-crm-border rounded w-16"></div>
+            </div>
+            @endforeach
+        </div>
+    </div>
+
+</div>
+
 {{-- ═══ RECENT ACTIVITY + PENDING CONVEYANCES ═══ --}}
 <div class="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
@@ -236,6 +302,8 @@ document.addEventListener('DOMContentLoaded', () => {
     loadAumTrend();
     loadRecentActivities();
     loadPendingConveyances();
+    loadTodayBirthdays();
+    loadTodayMeetings();
 });
 
 // ── 1. Stat Tiles ────────────────────────────────────
@@ -390,5 +458,86 @@ async function loadPendingConveyances() {
         </div>
     `).join('');
 }
+
+// ── 6. Today's Birthdays ─────────────────────────────
+async function loadTodayBirthdays() {
+    const res  = await ajaxGet('{{ route("dashboard.today-birthdays") }}');
+    const list = document.getElementById('birthdaysList');
+    if (!res.success) { list.innerHTML = '<p class="text-xs text-crm-gray text-center py-4">Could not load.</p>'; return; }
+
+    if (res.data.length === 0) {
+        list.innerHTML = `
+            <div class="text-center py-6">
+                <div class="text-3xl mb-2">🎂</div>
+                <p class="text-xs text-crm-gray">No birthdays today.</p>
+            </div>`;
+        return;
+    }
+
+    list.innerHTML = res.data.map(b => `
+        <div class="flex items-center gap-3 p-3 rounded-[10px] hover:bg-pink-50 transition-all border border-pink-100">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 text-lg"
+                 style="background:#fff0f6">
+                🎂
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-bold text-dark truncate">${b.client_name}</div>
+                <div class="text-xs text-crm-gray mt-0.5">
+                    ${b.client_mobile ?? '—'}
+                    ${b.age ? ' · Turning ' + b.age : ''}
+                </div>
+            </div>
+            <a href="tel:${b.client_mobile}"
+               class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 transition-all hover:scale-110"
+               style="background:#fff0f6">
+                <svg class="w-3.5 h-3.5 fill-none stroke-2" style="stroke:#ec4899" viewBox="0 0 24 24">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.4 2 2 0 0 1 3.6 1.22h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.84a16 16 0 0 0 6 6l.92-.92a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 21.73 16z"/>
+                </svg>
+            </a>
+        </div>
+    `).join('');
+}
+
+// ── 7. Today's Meetings ──────────────────────────────
+async function loadTodayMeetings() {
+    const res  = await ajaxGet('{{ route("dashboard.today-meetings") }}');
+    const list = document.getElementById('meetingsList');
+    if (!res.success) { list.innerHTML = '<p class="text-xs text-crm-gray text-center py-4">Could not load.</p>'; return; }
+
+    if (res.data.length === 0) {
+        list.innerHTML = `
+            <div class="text-center py-6">
+                <div class="text-3xl mb-2">📅</div>
+                <p class="text-xs text-crm-gray">No meetings scheduled today.</p>
+            </div>`;
+        return;
+    }
+
+    list.innerHTML = res.data.map(m => `
+        <div class="flex items-start gap-3 p-3 rounded-[10px] hover:bg-blue-50 transition-all border border-blue-100">
+            <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5"
+                 style="background:#eff6ff">
+                <svg class="w-4 h-4 fill-none stroke-2" style="stroke:#3b82f6" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                    <line x1="16" y1="2" x2="16" y2="6"/>
+                    <line x1="8" y1="2" x2="8" y2="6"/>
+                    <line x1="3" y1="10" x2="21" y2="10"/>
+                </svg>
+            </div>
+            <div class="flex-1 min-w-0">
+                <div class="text-sm font-bold text-dark truncate">${m.client_name}</div>
+                <div class="text-xs text-crm-gray mt-0.5">
+                    📍 ${m.location}
+                </div>
+                ${m.notes ? `<div class="text-xs text-crm-gray mt-0.5 truncate">📝 ${m.notes}</div>` : ''}
+            </div>
+            <div class="flex flex-col items-end gap-1 flex-shrink-0">
+                <span class="text-xs font-bold text-blue-600">${m.meeting_time}</span>
+                <span class="text-[10px] text-crm-gray">${m.assigned_to}</span>
+            </div>
+        </div>
+    `).join('');
+}
+
 </script>
 @endpush

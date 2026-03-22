@@ -191,6 +191,68 @@ class DashboardService
     }
 
     /**
+     * Get clients with birthday today
+     * Scoped by role
+     */
+    public function getTodayBirthdays(): array
+    {
+        $user  = auth()->user();
+        $today = now();
+
+        $query = Client::whereMonth('date_of_birth', $today->month)
+            ->whereDay('date_of_birth', $today->day)
+            ->where('is_active', true);
+
+        if (!$user->isSuperAdmin()) {
+            $query->where('assigned_to', $user->id);
+        }
+
+        return $query->get()->map(function ($client) {
+            $dob  = $client->date_of_birth;
+            $age  = $dob ? now()->diffInYears($dob) : null;
+
+            return [
+                'id'             => $client->id,
+                'client_name'    => $client->client_name,
+                'client_mobile'  => $client->client_mobile,
+                'client_email'   => $client->client_email,
+                'age'            => $age,
+                'assigned_to'    => $client->assignedTo?->name,
+            ];
+        })->toArray();
+    }
+
+    /**
+     * Get meetings scheduled for today
+     * Scoped by role
+     */
+    public function getTodayMeetings(): array
+    {
+        $user  = auth()->user();
+
+        $query = \App\Models\Meeting::with(['client', 'user'])
+            ->whereDate('meeting_date', today())
+            ->where('status', 'scheduled')
+            ->orderBy('meeting_time');
+
+        if (!$user->isSuperAdmin()) {
+            $query->where('user_id', $user->id);
+        }
+
+        return $query->get()->map(function ($meeting) {
+            return [
+                'id'           => $meeting->id,
+                'client_name'  => $meeting->client->client_name ?? '—',
+                'client_mobile'=> $meeting->client->client_mobile ?? '—',
+                'meeting_time' => \Carbon\Carbon::parse($meeting->meeting_time)->format('h:i A'),
+                'location'     => $meeting->location ?? 'Not specified',
+                'notes'        => $meeting->notes,
+                'assigned_to'  => $meeting->user->name ?? '—',
+            ];
+        })->toArray();
+    }
+
+    /**
      * Format number to Indian Crore format
      */
     private function formatCrore(float $amount): string
