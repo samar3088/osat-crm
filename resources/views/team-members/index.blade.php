@@ -51,6 +51,59 @@
     </button>
 </div>
 
+{{-- ═══ FILTERS ═══ --}}
+<div class="bg-white rounded-card shadow-card p-4 mb-5">
+    <div class="flex items-end gap-3 flex-wrap">
+
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Status</label>
+            <select id="filterStatus" class="crm-input">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Work Type</label>
+            <select id="filterWorkType" class="crm-input">
+                <option value="">All Types</option>
+                <option value="Sales">Sales</option>
+                <option value="Operations">Operations</option>
+                <option value="Both">Both</option>
+            </select>
+        </div>
+
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Assigned To</label>
+            <input type="text" id="filterAssigned" class="crm-input"
+                   placeholder="Search assigned..."/>
+        </div>
+
+        <div class="flex items-center gap-2 pb-0.5">
+            <button onclick="applyFilters()"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white
+                           rounded-input text-sm font-bold hover:bg-primary-dark transition-all">
+                <svg class="w-4 h-4 stroke-white fill-none stroke-2" viewBox="0 0 24 24">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                Filter
+            </button>
+            <button onclick="resetFilters()"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-crm-light text-crm-gray
+                           rounded-input text-sm font-bold hover:bg-crm-border transition-all
+                           border border-crm-border">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+                </svg>
+                Reset
+            </button>
+        </div>
+
+    </div>
+</div>
+
 {{-- ═══ TABLE ═══ --}}
 <div class="bg-white rounded-card shadow-card overflow-hidden p-5">
     <table id="membersTable" class="w-full" style="width:100%">
@@ -314,126 +367,73 @@ let membersTable;
 // ── Init DataTable ───────────────────────────────────
 $(document).ready(function() {
     membersTable = $('#membersTable').DataTable({
+        processing: true,
+        serverSide: true,
         ajax: {
-            url:      '{{ route("team-members.list") }}',
-            type:     'GET',
-            dataSrc:  'data',
-            beforeSend: function() {
-                showLoader();
-            },
-            complete: function() {
-                hideLoader();
-            },
-            error: function() {
+            url:        '{{ route("team-members.list") }}',
+            type:       'GET',
+            beforeSend: function() { showLoader(); },
+            complete:   function() { hideLoader(); },
+            error:      function() {
                 hideLoader();
                 showToast('Failed to load team members.', 'error');
+            },
+            data: function(d) {
+                d.filter_status   = $('#filterStatus').val();
+                d.filter_worktype = $('#filterWorkType').val();
+                d.filter_assigned = $('#filterAssigned').val();
             }
         },
-        processing:  false,  // hide default processing text
-        serverSide:  false,  // client-side processing
         columns: [
-            {
-                data: null,
-                render: (data, type, row, meta) => String(meta.row + 1).padStart(2, '0'),
-                orderable: false,
-                width: '50px'
-            },
-            {
-                data: 'name',
-                render: (data, type, row) => `
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center flex-shrink-0">
-                            <span class="text-xs font-bold text-primary">${data.charAt(0).toUpperCase()}</span>
-                        </div>
-                        <div>
-                            <div class="font-bold text-dark text-sm">${data}</div>
-                            <div class="text-xs text-gray-400">${row.email}</div>
-                        </div>
-                    </div>`
-            },
-            { data: 'employee_code' },
-            { data: 'work_type' },
-            { data: 'assigned_to' },
-            { data: 'clients_count', title: 'Clients' },
-            {
-                data: 'is_active',
-                render: (data, type, row) => `
-                    <button onclick="toggleStatus(${row.id}, this)"
-                            class="px-3 py-1 rounded-full text-xs font-bold transition-all
-                                   ${data ? 'bg-green-50 text-green-600 hover:bg-green-100' : 'bg-red-50 text-red-500 hover:bg-red-100'}">
-                        ${data ? 'Active' : 'Inactive'}
-                    </button>`
-            },
-            { data: 'created_at' },
-            {
-                data: null,
-                orderable: false,
-                render: (data, type, row) => `
-                    <div class="flex items-center gap-2">
-                        <button onclick="openEditModal(${row.id})" title="Edit"
-                                class="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center
-                                       hover:bg-primary hover:text-white text-primary transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                        </button>
-                        <button onclick="openTargetModal(${row.id}, '${row.name}')" title="Set Target"
-                                class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center
-                                       hover:bg-green-500 hover:text-white text-green-500 transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10"/>
-                                <circle cx="12" cy="12" r="6"/>
-                                <circle cx="12" cy="12" r="2"/>
-                            </svg>
-                        </button>
-                        <button onclick="openDeleteModal(${row.id}, '${row.name}')" title="Delete"
-                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
-                                       hover:bg-red-500 hover:text-white text-red-500 transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <polyline points="3 6 5 6 21 6"/>
-                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                                <path d="M10 11v6"/><path d="M14 11v6"/>
-                            </svg>
-                        </button>
-                    </div>`
-            }
+            { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '50px' },
+            { data: 'name_email',  name: 'name_email',  orderable: true },
+            { data: 'employee_code', name: 'employee_code' },
+            { data: 'work_type',   name: 'work_type' },
+            { data: 'assigned_name', name: 'assigned_name', orderable: false },
+            { data: 'clients_count', name: 'clients_count', orderable: false },
+            { data: 'status_badge',  name: 'status_badge',  orderable: false },
+            { data: 'created_at',    name: 'created_at' },
+            { data: 'actions',       name: 'actions', orderable: false, searchable: false },
         ],
         dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
         buttons: [
             {
-                extend:    'excelHtml5',
-                text:      '<svg class="w-4 h-4 stroke-current fill-none stroke-2 inline mr-1" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> Excel',
+                extend: 'excelHtml5', text: 'Excel',
                 className: 'px-4 py-2 bg-green-50 text-green-600 rounded-input text-sm font-bold border border-green-200 hover:bg-green-100',
-                title:     'Team Members'
+                title: 'Team Members'
             },
             {
-                extend:    'pdfHtml5',
-                text:      '<svg class="w-4 h-4 stroke-current fill-none stroke-2 inline mr-1" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> PDF',
+                extend: 'pdfHtml5', text: 'PDF',
                 className: 'px-4 py-2 bg-red-50 text-red-500 rounded-input text-sm font-bold border border-red-200 hover:bg-red-100',
-                title:     'Team Members Report'
+                title: 'Team Members Report'
             },
         ],
-        pageLength:  15,
-        lengthMenu:  [[10, 15, 25, 50], [10, 15, 25, 50]],
+        pageLength: 15,
+        lengthMenu: [[10, 15, 25, 50], [10, 15, 25, 50]],
         language: {
-            search:         '',
-            searchPlaceholder: 'Search team members...',
-            lengthMenu:     'Show _MENU_ entries',
-            info:           'Showing _START_ to _END_ of _TOTAL_ members',
-            infoEmpty:      'No members found',
-            emptyTable:     'No team members added yet',
-            paginate: {
-                first:    '«',
-                last:     '»',
-                next:     '›',
-                previous: '‹'
-            }
+            search: '', searchPlaceholder: 'Search team members...',
+            lengthMenu: 'Show _MENU_ entries',
+            info: 'Showing _START_ to _END_ of _TOTAL_ members',
+            infoEmpty: 'No members found',
+            emptyTable: 'No team members added yet',
+            paginate: { first: '«', last: '»', next: '›', previous: '‹' },
+            processing: '<div class="flex items-center gap-2 text-primary"><div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div> Loading...</div>'
         },
         order: [[7, 'desc']],
         responsive: true,
     });
 });
+
+function refreshTable() { membersTable.ajax.reload(null, false); }
+
+function applyFilters() { membersTable.ajax.reload(null, false); }
+
+function resetFilters() {
+    $('#filterStatus').val('');
+    $('#filterWorkType').val('');
+    $('#filterAssigned').val('');
+    membersTable.ajax.reload(null, false);
+}
 
 // ── Refresh table after any action ───────────────────
 function refreshTable() {

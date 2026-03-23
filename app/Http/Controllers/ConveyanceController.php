@@ -25,14 +25,124 @@ class ConveyanceController extends Controller
     /**
      * AJAX — Get all conveyances
      */
-    public function list(): JsonResponse
+    public function list(Request $request): JsonResponse
     {
-        try {
-            $data = $this->service->getAll();
-            return response()->json(['success' => true, 'data' => $data]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        $user  = auth()->user();
+        $query = Conveyance::with(['user', 'actionedBy'])
+            ->select('conveyances.*');
+
+        // Data scoping
+        if (!$user->isSuperAdmin()) {
+            $query->where('user_id', $user->id);
         }
+
+        return datatables()->of($query)
+            ->addIndexColumn()
+            ->addColumn('team_member', fn($c) => e($c->user->name ?? '—'))
+            ->addColumn('type_badge', function($c) {
+                $colors = [
+                    'Travel'        => 'bg-blue-50 text-blue-600',
+                    'Food'          => 'bg-green-50 text-green-600',
+                    'Accommodation' => 'bg-purple-50 text-purple-600',
+                    'Fuel'          => 'bg-orange-50 text-orange-500',
+                    'Other'         => 'bg-gray-50 text-gray-500',
+                ];
+                $cls = $colors[$c->conveyance_type] ?? 'bg-gray-50 text-gray-500';
+                return "<span class=\"px-2 py-1 rounded-full text-xs font-bold {$cls}\">" . e($c->conveyance_type) . "</span>";
+            })
+            ->addColumn('amount_fmt', fn($c) => '₹' . number_format($c->amount, 2))
+            ->addColumn('bill_link', function($c) {
+                return $c->bill_path
+                    ? '<a href="' . asset('storage/' . $c->bill_path) . '" target="_blank"
+                        class="flex items-center gap-1 text-xs text-primary font-bold hover:underline">
+                        <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                            <circle cx="12" cy="12" r="3"/>
+                        </svg>View</a>'
+                    : '<span class="text-xs text-crm-gray">No bill</span>';
+            })
+            ->addColumn('status_badge', function($c) {
+                $config = [
+                    'pending'  => 'bg-orange-50 text-orange-500',
+                    'approved' => 'bg-green-50 text-green-600',
+                    'rejected' => 'bg-red-50 text-red-500',
+                ];
+                $cls   = $config[$c->status] ?? 'bg-gray-50 text-gray-500';
+                $label = ucfirst($c->status);
+                return "<span class=\"px-3 py-1 rounded-full text-xs font-bold {$cls}\">{$label}</span>";
+            })
+            ->addColumn('actions', function($c) use ($user) {
+                $actions = '';
+
+                if ($user->isSuperAdmin() && $c->status === 'pending') {
+                    $actions .= '
+                        <button onclick="openActionModal(' . $c->id . ', \'approve\', \'' . e($c->user->name ?? '') . '\', \'' . e($c->conveyance_type) . '\', \'' . number_format($c->amount, 2) . '\')"
+                                title="Approve"
+                                class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center
+                                    hover:bg-green-500 hover:text-white text-green-500 transition-all">
+                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                        </button>
+                        <button onclick="openActionModal(' . $c->id . ', \'reject\', \'' . e($c->user->name ?? '') . '\', \'' . e($c->conveyance_type) . '\', \'' . number_format($c->amount, 2) . '\')"
+                                title="Reject"
+                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
+                                    hover:bg-red-500 hover:text-white text-red-500 transition-all">
+                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                        </button>';
+                }
+
+                if (!$user->isSuperAdmin() && $c->status === 'pending') {
+                    $actions .= '
+                        <button onclick="openDeleteModal(' . $c->id . ')"
+                                title="Delete"
+                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
+                                    hover:bg-red-500 hover:text-white text-red-500 transition-all">
+                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                <path d="M10 11v6"/><path d="M14 11v6"/>
+                            </svg>
+                        </button>';
+                }
+
+                if (!$actions) $actions = '<span class="text-xs text-crm-gray">—</span>';
+                return '<div class="flex items-center gap-2">' . $actions . '</div>';
+            })
+            ->filterColumn('team_member', function($query, $keyword) {
+                $query->whereHas('user', fn($q) => $q->where('name', 'like', "%{$keyword}%"));
+            })
+            ->filterColumn('type_badge', function($query, $keyword) {
+                $query->where('conveyances.conveyance_type', 'like', "%{$keyword}%");
+            })
+            ->filterColumn('status_badge', function($query, $keyword) {
+                $query->where('conveyances.status', 'like', "%{$keyword}%");
+            })
+            ->rawColumns(['type_badge', 'bill_link', 'status_badge', 'actions'])
+            ->filter(function($query) use ($request) {
+                if ($request->filter_status) {
+                    $query->where('conveyances.status', $request->filter_status);
+                }
+                if ($request->filter_type) {
+                    $query->where('conveyances.conveyance_type', $request->filter_type);
+                }
+                if ($request->filter_member) {
+                    $query->whereHas('user', function($q) use ($request) {
+                        $q->where('name', 'like', "%{$request->filter_member}%");
+                    });
+                }
+            }, true)
+            ->with([
+                'stats' => [
+                    'pending'  => Conveyance::where('status', 'pending')->count(),
+                    'approved' => Conveyance::where('status', 'approved')->count(),
+                    'rejected' => Conveyance::where('status', 'rejected')->count(),
+                ]
+            ])
+            ->make(true);
     }
 
     /**

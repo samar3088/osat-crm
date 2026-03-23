@@ -31,29 +31,99 @@ class TeamMemberController extends Controller
      */
     public function list(Request $request): JsonResponse
     {
-        try {
-            $members = User::role('team_member')
-                ->with('assignedTo')
-                ->withCount('clients')
-                ->latest()
-                ->get()
-                ->map(fn($m, $i) => [
-                    'id'             => $m->id,
-                    'name'           => $m->name,
-                    'email'          => $m->email,
-                    'employee_code'  => $m->employee_code ?? '—',
-                    'work_type'      => $m->work_type,
-                    'assigned_to'    => $m->assignedTo?->name ?? '—',
-                    'assigned_to_id' => $m->assigned_to,
-                    'clients_count'  => $m->clients_count,
-                    'is_active'      => $m->is_active,
-                    'created_at'     => $m->created_at->format('d M Y'),
-                ]);
+        $query = User::role('team_member')
+            ->with('assignedTo')
+            ->withCount('clients')
+            ->select('users.*');
 
-            return response()->json(['success' => true, 'data' => $members]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
-        }
+        return datatables()->of($query)
+            ->addIndexColumn()
+            ->addColumn('name_email', function($m) {
+                return '
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center flex-shrink-0">
+                            <span class="text-xs font-bold text-primary">' . strtoupper(substr($m->name, 0, 1)) . '</span>
+                        </div>
+                        <div>
+                            <div class="font-bold text-dark text-sm">' . e($m->name) . '</div>
+                            <div class="text-xs text-gray-400">' . e($m->email) . '</div>
+                        </div>
+                    </div>';
+            })
+            ->addColumn('status_badge', function($m) {
+                $cls = $m->is_active
+                    ? 'bg-green-50 text-green-600 hover:bg-green-100'
+                    : 'bg-red-50 text-red-500 hover:bg-red-100';
+                $label = $m->is_active ? 'Active' : 'Inactive';
+                return "<button onclick=\"toggleStatus({$m->id}, this)\"
+                                class=\"px-3 py-1 rounded-full text-xs font-bold transition-all {$cls}\">
+                            {$label}
+                        </button>";
+            })
+            ->addColumn('assigned_name', fn($m) => $m->assignedTo?->name ?? '—')
+            ->addColumn('actions', function($m) {
+                return '
+                    <div class="flex items-center gap-2">
+                        <button onclick="openEditModal(' . $m->id . ')" title="Edit"
+                                class="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center
+                                    hover:bg-primary hover:text-white text-primary transition-all">
+                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                            </svg>
+                        </button>
+                        <button onclick="openTargetModal(' . $m->id . ', \'' . e($m->name) . '\')" title="Set Target"
+                                class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center
+                                    hover:bg-green-500 hover:text-white text-green-500 transition-all">
+                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10"/>
+                                <circle cx="12" cy="12" r="6"/>
+                                <circle cx="12" cy="12" r="2"/>
+                            </svg>
+                        </button>
+                        <button onclick="openDeleteModal(' . $m->id . ', \'' . e($m->name) . '\')" title="Delete"
+                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
+                                    hover:bg-red-500 hover:text-white text-red-500 transition-all">
+                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                                <polyline points="3 6 5 6 21 6"/>
+                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
+                                <path d="M10 11v6"/><path d="M14 11v6"/>
+                            </svg>
+                        </button>
+                    </div>';
+            })
+            ->filterColumn('name_email', function($query, $keyword) {
+                $query->where(function($q) use ($keyword) {
+                    $q->where('users.name', 'like', "%{$keyword}%")
+                    ->orWhere('users.email', 'like', "%{$keyword}%")
+                    ->orWhere('users.employee_code', 'like', "%{$keyword}%");
+                });
+            })
+            ->filterColumn('assigned_name', function($query, $keyword) {
+                $query->whereHas('assignedTo', function($q) use ($keyword) {
+                    $q->where('name', 'like', "%{$keyword}%");
+                });
+            })
+            ->filterColumn('status_badge', function($query, $keyword) {
+                $active = strtolower($keyword) === 'active' ? 1 : 0;
+                $query->where('users.is_active', $active);
+            })
+            ->rawColumns(['name_email', 'status_badge', 'actions'])
+            ->filter(function($query) use ($request) {
+                if ($request->filter_status) {
+                    $active = $request->filter_status === 'Active' ? 1 : 0;
+                    $query->where('users.is_active', $active);
+                }
+                if ($request->filter_worktype) {
+                    $query->where('users.work_type', $request->filter_worktype);
+                }
+                if ($request->filter_assigned) {
+                    $query->whereHas('assignedTo', function($q) use ($request) {
+                        $q->where('name', 'like', "%{$request->filter_assigned}%");
+                    });
+                }
+            }, true)
+            ->make(true);
     }
 
     /**

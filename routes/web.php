@@ -85,6 +85,10 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/customers',                        [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/list',                   [CustomerController::class, 'list'])->name('customers.list');
     Route::post('/customers',                       [CustomerController::class, 'store'])->name('customers.store');
+    // Customers exports
+    Route::get('/customers/export/excel', [CustomerController::class, 'exportExcel'])->name('customers.export-excel');
+    Route::get('/customers/export/pdf',   [CustomerController::class, 'exportPdf'])->name('customers.export-pdf');
+
     Route::get('/customers/{customer}',             [CustomerController::class, 'show'])->name('customers.show');
     Route::put('/customers/{customer}',             [CustomerController::class, 'update'])->name('customers.update');
     Route::patch('/customers/{customer}/status',    [CustomerController::class, 'toggleStatus'])->name('customers.toggle-status');

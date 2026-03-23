@@ -46,6 +46,65 @@
     @endcan
 </div>
 
+{{-- ═══ FILTERS ═══ --}}
+<div class="bg-white rounded-card shadow-card p-4 mb-5">
+    <div class="flex items-end gap-3 flex-wrap">
+
+        {{-- Client Type --}}
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Client Type</label>
+            <select id="filterType" class="crm-input">
+                <option value="">All Types</option>
+                <option value="New Client">New Client</option>
+                <option value="Existing Client">Existing Client</option>
+                <option value="Prospect Client">Prospect Client</option>
+            </select>
+        </div>
+
+        {{-- Status --}}
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Status</label>
+            <select id="filterStatus" class="crm-input">
+                <option value="">All Status</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+        </div>
+
+        {{-- Assigned RM — Super Admin only --}}
+        @if(auth()->user()->isSuperAdmin())
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Assigned RM</label>
+            <input type="text" id="filterAssigned" class="crm-input"
+                   placeholder="Search RM name..."/>
+        </div>
+        @endif
+
+        {{-- Buttons --}}
+        <div class="flex items-center gap-2 pb-0.5">
+            <button onclick="applyFilters()"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white
+                           rounded-input text-sm font-bold hover:bg-primary-dark transition-all">
+                <svg class="w-4 h-4 stroke-white fill-none stroke-2" viewBox="0 0 24 24">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                Filter
+            </button>
+            <button onclick="resetFilters()"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-crm-light text-crm-gray
+                           rounded-input text-sm font-bold hover:bg-crm-border transition-all
+                           border border-crm-border">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+                </svg>
+                Reset
+            </button>
+        </div>
+
+    </div>
+</div>
+
 {{-- ═══ TABLE ═══ --}}
 <div class="bg-white rounded-card shadow-card overflow-hidden p-5">
     <table id="customersTable" class="w-full" style="width:100%">
@@ -252,115 +311,49 @@
 @push('scripts')
 <script>
 let customersTable;
+const isAdmin = {{ auth()->user()->isSuperAdmin() ? 'true' : 'false' }};
 
-// ── Init DataTable ───────────────────────────────────
 $(document).ready(function() {
     customersTable = $('#customersTable').DataTable({
+        processing: true,
+        serverSide: true,
         ajax: {
-            url:        '{{ route("customers.list") }}',
-            type:       'GET',
-            dataSrc:    'data',
+            url:  '{{ route("customers.list") }}',
+            type: 'GET',
             beforeSend: function() { showLoader(); },
             complete:   function() { hideLoader(); },
-            error:      function() {
+            error: function() {
                 hideLoader();
                 showToast('Failed to load customers.', 'error');
+            },
+            data: function(d) {
+                d.filter_type     = $('#filterType').val();
+                d.filter_status   = $('#filterStatus').val();
+                d.filter_assigned = isAdmin ? $('#filterAssigned').val() : '';
             }
         },
-        processing: false,
-        serverSide: false,
         columns: [
-            {
-                data:      null,
-                orderable: false,
-                width:     '50px',
-                render:    (data, type, row, meta) => String(meta.row + 1).padStart(2, '0')
-            },
-            {
-                data:   'client_name',
-                render: (data, type, row) => `
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full bg-primary-light flex items-center justify-center flex-shrink-0">
-                            <span class="text-xs font-bold text-primary">${data.charAt(0).toUpperCase()}</span>
-                        </div>
-                        <div>
-                            <div class="font-bold text-dark text-sm">${data}</div>
-                            <div class="text-xs text-gray-400">${row.client_email}</div>
-                        </div>
-                    </div>`
-            },
-            { data: 'client_pan' },
-            { data: 'client_mobile' },
-            { data: 'client_email', visible: false },
-            {
-                data:   'client_type',
-                render: (data) => {
-                    const colors = {
-                        'New Client':      'bg-blue-50 text-blue-600',
-                        'Existing Client': 'bg-green-50 text-green-600',
-                        'Prospect Client': 'bg-orange-50 text-orange-500',
-                    };
-                    const cls = colors[data] || 'bg-crm-light text-crm-gray';
-                    return `<span class="px-2 py-1 rounded-full text-xs font-bold ${cls}">${data}</span>`;
-                }
-            },
-            { data: 'assigned_to' },
-            {
-                data:   'is_active',
-                render: (data, type, row) => `
-                    <button onclick="toggleStatus(${row.id})"
-                            class="px-3 py-1 rounded-full text-xs font-bold transition-all
-                                   ${data ? 'bg-green-50 text-green-600 hover:bg-green-100'
-                                          : 'bg-red-50 text-red-500 hover:bg-red-100'}">
-                        ${data ? 'Active' : 'Inactive'}
-                    </button>`
-            },
-            {
-                data:      null,
-                orderable: false,
-                render:    (data, type, row) => `
-                    <div class="flex items-center gap-2">
-                        <a href="/customers/${row.id}/profile"
-                           title="View Profile"
-                           class="w-8 h-8 rounded-lg bg-crm-light flex items-center justify-center
-                                  hover:bg-primary hover:text-white text-crm-gray transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                                <circle cx="12" cy="12" r="3"/>
-                            </svg>
-                        </a>
-                        <button onclick="openEditModal(${row.id})" title="Edit"
-                                class="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center
-                                       hover:bg-primary hover:text-white text-primary transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
-                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
-                            </svg>
-                        </button>
-                        <button onclick="openDeleteModal(${row.id}, '${row.client_name}')" title="Delete"
-                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
-                                       hover:bg-red-500 hover:text-white text-red-500 transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <polyline points="3 6 5 6 21 6"/>
-                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                                <path d="M10 11v6"/><path d="M14 11v6"/>
-                            </svg>
-                        </button>
-                    </div>`
-            }
+            { data: 'DT_RowIndex',   name: 'DT_RowIndex',   orderable: false, searchable: false, width: '50px' },
+            { data: 'name_email',    name: 'name_email' },
+            { data: 'client_pan',    name: 'client_pan' },
+            { data: 'client_mobile', name: 'client_mobile' },
+            { data: 'type_badge',    name: 'type_badge',    orderable: false },
+            { data: 'assigned_name', name: 'assigned_name', orderable: false },
+            { data: 'status_badge',  name: 'status_badge',  orderable: false },
+            { data: 'actions',       name: 'actions',       orderable: false, searchable: false },
         ],
         dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
         buttons: [
             {
                 extend:    'excelHtml5',
                 text:      'Excel',
-                className: 'hidden',
+                className: 'px-4 py-2 bg-green-50 text-green-600 rounded-input text-sm font-bold border border-green-200 hover:bg-green-100',
                 title:     'Customers List'
             },
             {
                 extend:    'pdfHtml5',
                 text:      'PDF',
-                className: 'hidden',
+                className: 'px-4 py-2 bg-red-50 text-red-500 rounded-input text-sm font-bold border border-red-200 hover:bg-red-100',
                 title:     'Customers Report'
             },
         ],
@@ -373,22 +366,46 @@ $(document).ready(function() {
             info:              'Showing _START_ to _END_ of _TOTAL_ clients',
             infoEmpty:         'No clients found',
             emptyTable:        'No customers added yet',
-            paginate: {
-                first: '«', last: '»', next: '›', previous: '‹'
-            }
+            paginate:          { first: '«', last: '»', next: '›', previous: '‹' },
+            processing:        '<div class="flex items-center gap-2 text-primary"><div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div> Loading...</div>'
         },
         order:     [[1, 'asc']],
         responsive: true,
     });
-
-    // Wire export buttons
-    $('#exportExcel').on('click', () => customersTable.button('.buttons-excel').trigger());
-    $('#exportPdf').on('click',   () => customersTable.button('.buttons-pdf').trigger());
 });
 
+// ── Table Actions ─────────────────────────────────────
 function refreshTable() { customersTable.ajax.reload(null, false); }
 
-// ── Modal Helpers ────────────────────────────────────
+function updateExportLinks() {
+    const type     = $('#filterType').val();
+    const status   = $('#filterStatus').val();
+    const assigned = isAdmin ? $('#filterAssigned').val() : '';
+
+    const params = new URLSearchParams();
+    if (type)     params.append('filter_type', type);
+    if (status)   params.append('filter_status', status);
+    if (assigned) params.append('filter_assigned', assigned);
+
+    const query = params.toString() ? '?' + params.toString() : '';
+    $('#exportExcelBtn').attr('href', '{{ route("customers.export-excel") }}' + query);
+    $('#exportPdfBtn').attr('href',   '{{ route("customers.export-pdf") }}'   + query);
+}
+
+function applyFilters() {
+    customersTable.ajax.reload(null, false);
+    updateExportLinks();
+}
+
+function resetFilters() {
+    $('#filterType').val('');
+    $('#filterStatus').val('');
+    if (isAdmin) $('#filterAssigned').val('');
+    customersTable.ajax.reload(null, false);
+    updateExportLinks();
+}
+
+// ── Modal Helpers ─────────────────────────────────────
 function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
     document.body.style.overflow = '';
@@ -398,7 +415,7 @@ function openModal(id) {
     document.body.style.overflow = 'hidden';
 }
 
-// ── Create Modal ─────────────────────────────────────
+// ── Create Modal ──────────────────────────────────────
 function openCreateModal() {
     document.getElementById('modalTitle').textContent  = 'Add Client';
     document.getElementById('customerId').value        = '';
@@ -416,70 +433,67 @@ function openCreateModal() {
     openModal('customerModal');
 }
 
-// ── Edit Modal ───────────────────────────────────────
+// ── Edit Modal ────────────────────────────────────────
 async function openEditModal(id) {
     const res = await ajaxGet(`/customers/${id}`);
     if (!res.success) return showToast('Failed to load client data.', 'error');
     const c = res.data;
-    document.getElementById('modalTitle').textContent       = 'Edit Client';
-    document.getElementById('customerId').value             = c.id;
-    document.getElementById('clientType').value             = c.client_type    ?? '';
-    document.getElementById('clientName').value             = c.client_name;
-    document.getElementById('clientPan').value              = c.client_pan     ?? '';
-    document.getElementById('clientMobile').value           = c.client_mobile  ?? '';
-    document.getElementById('clientEmail').value            = c.client_email   ?? '';
-    document.getElementById('clientSource').value           = c.source_detail  ?? '';
-    document.getElementById('clientDob').value              = c.date_of_birth  ?? '';
-    document.getElementById('clientAssignedTo').value       = c.assigned_to    ?? '';
-    document.getElementById('clientRemarks').value          = c.full_remarks   ?? '';
-    document.getElementById('clientStatus').value           = c.is_active ? '1' : '0';
-    document.getElementById('statusRow').style.display      = 'block';
+    document.getElementById('modalTitle').textContent      = 'Edit Client';
+    document.getElementById('customerId').value            = c.id;
+    document.getElementById('clientType').value            = c.client_type   ?? '';
+    document.getElementById('clientName').value            = c.client_name;
+    document.getElementById('clientPan').value             = c.client_pan    ?? '';
+    document.getElementById('clientMobile').value          = c.client_mobile ?? '';
+    document.getElementById('clientEmail').value           = c.client_email  ?? '';
+    document.getElementById('clientSource').value          = c.source_detail ?? '';
+    document.getElementById('clientDob').value             = c.date_of_birth ?? '';
+    document.getElementById('clientAssignedTo').value      = c.assigned_to   ?? '';
+    document.getElementById('clientRemarks').value         = c.full_remarks  ?? '';
+    document.getElementById('clientStatus').value          = c.is_active ? '1' : '0';
+    document.getElementById('statusRow').style.display     = 'block';
     document.getElementById('modalError').classList.add('hidden');
     openModal('customerModal');
 }
 
-// ── Save Customer ────────────────────────────────────
+// ── Save Customer ─────────────────────────────────────
 async function saveCustomer() {
     const id     = document.getElementById('customerId').value;
     const isEdit = !!id;
-    const payload = {
-        client_type:    document.getElementById('clientType').value,
-        client_name:    document.getElementById('clientName').value,
-        client_pan:     document.getElementById('clientPan').value,
-        client_mobile:  document.getElementById('clientMobile').value,
-        client_email:   document.getElementById('clientEmail').value,
-        source_detail:  document.getElementById('clientSource').value,
-        date_of_birth:  document.getElementById('clientDob').value       || null,
-        assigned_to:    document.getElementById('clientAssignedTo').value || null,
-        full_remarks:   document.getElementById('clientRemarks').value,
-        is_active:      document.getElementById('clientStatus')?.value   ?? '1',
-    };
 
-    // ── Frontend Validation ──────────────────────────
-    const name = document.getElementById('clientName').value.trim();
+    const name   = document.getElementById('clientName').value.trim();
     const mobile = document.getElementById('clientMobile').value.trim();
     const email  = document.getElementById('clientEmail').value.trim();
 
+    // Frontend Validation
     if (!name) {
         document.getElementById('modalError').classList.remove('hidden');
         document.getElementById('modalErrorText').textContent = '• Client name is required.';
         return;
     }
-
     if (mobile && mobile.replace(/\D/g, '').length < 10) {
         document.getElementById('modalError').classList.remove('hidden');
         document.getElementById('modalErrorText').textContent = '• Mobile number must be at least 10 digits.';
         return;
     }
-
     if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
         document.getElementById('modalError').classList.remove('hidden');
         document.getElementById('modalErrorText').textContent = '• Please enter a valid email address.';
         return;
     }
-
-    // Hide error if all valid
     document.getElementById('modalError').classList.add('hidden');
+
+    const payload = {
+        client_type:   document.getElementById('clientType').value,
+        client_name:   name,
+        client_pan:    document.getElementById('clientPan').value,
+        client_mobile: mobile,
+        client_email:  email,
+        source_detail: document.getElementById('clientSource').value,
+        date_of_birth: document.getElementById('clientDob').value      || null,
+        assigned_to:   document.getElementById('clientAssignedTo').value || null,
+        full_remarks:  document.getElementById('clientRemarks').value,
+        is_active:     document.getElementById('clientStatus')?.value  ?? '1',
+    };
 
     showLoader();
     try {
@@ -519,11 +533,11 @@ async function saveCustomer() {
     }
 }
 
-// ── Toggle Status ────────────────────────────────────
+// ── Toggle Status ─────────────────────────────────────
 async function toggleStatus(id) {
     showLoader();
     try {
-        const res = await fetch(`/customers/${id}/status`, {
+        const res  = await fetch(`/customers/${id}/status`, {
             method:  'PATCH',
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
@@ -537,7 +551,7 @@ async function toggleStatus(id) {
     } catch(e) { hideLoader(); showToast('Something went wrong.', 'error'); }
 }
 
-// ── Delete ───────────────────────────────────────────
+// ── Delete ────────────────────────────────────────────
 function openDeleteModal(id, name) {
     document.getElementById('deleteClientId').value         = id;
     document.getElementById('deleteClientName').textContent = name;

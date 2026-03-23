@@ -67,6 +67,68 @@
     </button>
 </div>
 
+{{-- ═══ FILTERS ═══ --}}
+<div class="bg-white rounded-card shadow-card p-4 mb-5">
+    <div class="flex items-end gap-3 flex-wrap">
+
+        {{-- Status Filter --}}
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Status</label>
+            <select id="filterStatus" class="crm-input">
+                <option value="">All Status</option>
+                <option value="pending">Pending</option>
+                <option value="approved">Approved</option>
+                <option value="rejected">Rejected</option>
+            </select>
+        </div>
+
+        @if(auth()->user()->isSuperAdmin())
+        {{-- Team Member Filter --}}
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Team Member</label>
+            <input type="text" id="filterMember" class="crm-input"
+                   placeholder="Search member..."/>
+        </div>
+        @endif
+
+        {{-- Type Filter --}}
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Type</label>
+            <select id="filterType" class="crm-input">
+                <option value="">All Types</option>
+                <option value="Travel">Travel</option>
+                <option value="Food">Food</option>
+                <option value="Accommodation">Accommodation</option>
+                <option value="Fuel">Fuel</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+
+        {{-- Buttons --}}
+        <div class="flex items-center gap-2 pb-0.5">
+            <button onclick="applyFilters()"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white
+                           rounded-input text-sm font-bold hover:bg-primary-dark transition-all">
+                <svg class="w-4 h-4 stroke-white fill-none stroke-2" viewBox="0 0 24 24">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/>
+                </svg>
+                Filter
+            </button>
+            <button onclick="resetFilters()"
+                    class="flex items-center gap-2 px-5 py-2.5 bg-crm-light text-crm-gray
+                           rounded-input text-sm font-bold hover:bg-crm-border transition-all
+                           border border-crm-border">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+                    <polyline points="1 4 1 10 7 10"/>
+                    <path d="M3.51 15a9 9 0 1 0 .49-3.5"/>
+                </svg>
+                Reset
+            </button>
+        </div>
+
+    </div>
+</div>
+
 {{-- ═══ TABLE ═══ --}}
 <div class="bg-white rounded-card shadow-card overflow-hidden p-5">
     <table id="conveyanceTable" class="w-full" style="width:100%">
@@ -289,146 +351,56 @@ const isSuperAdmin = {{ auth()->user()->isSuperAdmin() ? 'true' : 'false' }};
 let conveyanceTable;
 
 // ── Init DataTable ───────────────────────────────────
-$(document).ready(function() {
+const isSuperAdmin = {{ auth()->user()->isSuperAdmin() ? 'true' : 'false' }};
 
+$(document).ready(function() {
     const columns = [
-        {
-            data: null, orderable: false, width: '50px',
-            render: (data, type, row, meta) => String(meta.row + 1).padStart(2, '0')
-        },
+        { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '50px' },
     ];
 
-    // Super Admin sees Team Member column
     if (isSuperAdmin) {
-        columns.push({
-            data: 'team_member',
-            render: (data) => `<span class="font-semibold text-dark">${data}</span>`
-        });
+        columns.push({ data: 'team_member', name: 'team_member' });
     }
 
     columns.push(
-        {
-            data: 'conveyance_type',
-            render: (data) => {
-                const colors = {
-                    'Travel':        'bg-blue-50 text-blue-600',
-                    'Food':          'bg-green-50 text-green-600',
-                    'Accommodation': 'bg-purple-50 text-purple-600',
-                    'Fuel':          'bg-orange-50 text-orange-500',
-                    'Other':         'bg-crm-light text-crm-gray',
-                };
-                const cls = colors[data] || 'bg-crm-light text-crm-gray';
-                return `<span class="px-2 py-1 rounded-full text-xs font-bold ${cls}">${data}</span>`;
-            }
-        },
-        { data: 'conveyance_date' },
-        {
-            data: 'amount',
-            render: (data) => `<span class="font-bold text-dark">₹${data}</span>`
-        },
-        { data: 'remarks' },
-        {
-            data: 'bill_path',
-            orderable: false,
-            render: (data) => data
-                ? `<a href="${data}" target="_blank"
-                      class="flex items-center gap-1 text-xs text-primary font-bold hover:underline">
-                       <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                           <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-                           <circle cx="12" cy="12" r="3"/>
-                       </svg>
-                       View
-                   </a>`
-                : '<span class="text-xs text-crm-gray">No bill</span>'
-        },
-        {
-            data: 'status',
-            render: (data) => {
-                const config = {
-                    pending:  { cls: 'bg-orange-50 text-orange-500', label: 'Pending' },
-                    approved: { cls: 'bg-green-50 text-green-600',   label: 'Approved' },
-                    rejected: { cls: 'bg-red-50 text-red-500',       label: 'Rejected' },
-                };
-                const c = config[data] || config.pending;
-                return `<span class="px-3 py-1 rounded-full text-xs font-bold ${c.cls}">${c.label}</span>`;
-            }
-        },
-        { data: 'action_remarks' },
-        {
-            data: null, orderable: false,
-            render: (data, type, row) => {
-                let actions = '';
-
-                // Super Admin — Approve/Reject pending claims
-                if (isSuperAdmin && row.status === 'pending') {
-                    actions += `
-                        <button onclick="openActionModal(${row.id}, 'approve', '${row.team_member}', '${row.conveyance_type}', '${row.amount}')"
-                                title="Approve"
-                                class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center
-                                       hover:bg-green-500 hover:text-white text-green-500 transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
-                        </button>
-                        <button onclick="openActionModal(${row.id}, 'reject', '${row.team_member}', '${row.conveyance_type}', '${row.amount}')"
-                                title="Reject"
-                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
-                                       hover:bg-red-500 hover:text-white text-red-500 transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <line x1="18" y1="6" x2="6" y2="18"/>
-                                <line x1="6" y1="6" x2="18" y2="18"/>
-                            </svg>
-                        </button>`;
-                }
-
-                // Team Member — Delete own pending claims
-                if (!isSuperAdmin && row.status === 'pending') {
-                    actions += `
-                        <button onclick="openDeleteModal(${row.id})"
-                                title="Delete"
-                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
-                                       hover:bg-red-500 hover:text-white text-red-500 transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <polyline points="3 6 5 6 21 6"/>
-                                <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
-                                <path d="M10 11v6"/><path d="M14 11v6"/>
-                            </svg>
-                        </button>`;
-                }
-
-                if (!actions) actions = '<span class="text-xs text-crm-gray">—</span>';
-                return `<div class="flex items-center gap-2">${actions}</div>`;
-            }
-        }
+        { data: 'type_badge',        name: 'type_badge',    orderable: false },
+        { data: 'conveyance_date',   name: 'conveyance_date' },
+        { data: 'amount_fmt',        name: 'amount',        orderable: true },
+        { data: 'remarks',           name: 'remarks' },
+        { data: 'bill_link',         name: 'bill_link',     orderable: false, searchable: false },
+        { data: 'status_badge',      name: 'status_badge',  orderable: false },
+        { data: 'action_remarks',    name: 'action_remarks' },
+        { data: 'actions',           name: 'actions',       orderable: false, searchable: false },
     );
 
     conveyanceTable = $('#conveyanceTable').DataTable({
+        processing: true,
+        serverSide: true,
         ajax: {
             url:        '{{ route("conveyance.list") }}',
             type:       'GET',
-            dataSrc:    'data',
             beforeSend: function() { showLoader(); },
             complete:   function(res) {
                 hideLoader();
-                // Update stats
-                if (isSuperAdmin && res.responseJSON?.data) {
-                    const data     = res.responseJSON.data;
-                    const pending  = data.filter(r => r.status === 'pending').length;
-                    const approved = data.filter(r => r.status === 'approved').length;
-                    const rejected = data.filter(r => r.status === 'rejected').length;
-                    document.getElementById('statPending').textContent  = pending;
-                    document.getElementById('statApproved').textContent = approved;
-                    document.getElementById('statRejected').textContent = rejected;
+                // Update stats for Super Admin
+                if (isSuperAdmin && res.responseJSON?.stats) {
+                    const s = res.responseJSON.stats;
+                    $('#statPending').text(s.pending);
+                    $('#statApproved').text(s.approved);
+                    $('#statRejected').text(s.rejected);
                 }
             },
             error: function() {
                 hideLoader();
                 showToast('Failed to load conveyances.', 'error');
+            },
+            data: function(d) {
+                d.filter_status = $('#filterStatus').val();
+                d.filter_type   = $('#filterType').val();
+                d.filter_member = isSuperAdmin ? $('#filterMember').val() : '';
             }
         },
-        processing: false,
-        serverSide: false,
-        columns:    columns,
+        columns: columns,
         dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
         buttons: [
             {
@@ -439,7 +411,7 @@ $(document).ready(function() {
             {
                 extend: 'pdfHtml5', text: 'PDF',
                 className: 'px-4 py-2 bg-red-50 text-red-500 rounded-input text-sm font-bold border border-red-200 hover:bg-red-100',
-                title: 'Conveyance Claims Report'
+                title: 'Conveyance Report'
             },
         ],
         pageLength: 15,
@@ -449,12 +421,24 @@ $(document).ready(function() {
             lengthMenu: 'Show _MENU_ entries',
             info: 'Showing _START_ to _END_ of _TOTAL_ claims',
             emptyTable: 'No conveyance claims found',
-            paginate: { first: '«', last: '»', next: '›', previous: '‹' }
+            paginate: { first: '«', last: '»', next: '›', previous: '‹' },
+            processing: '<div class="flex items-center gap-2 text-primary"><div class="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div> Loading...</div>'
         },
         order: [[isSuperAdmin ? 3 : 2, 'desc']],
         responsive: true,
     });
 });
+
+function refreshTable() { conveyanceTable.ajax.reload(null, false); }
+
+function applyFilters() { conveyanceTable.ajax.reload(null, false); }
+
+function resetFilters() {
+    $('#filterStatus').val('');
+    $('#filterType').val('');
+    if (isSuperAdmin) $('#filterMember').val('');
+    conveyanceTable.ajax.reload(null, false);
+}
 
 function refreshTable() { conveyanceTable.ajax.reload(null, false); }
 
@@ -653,5 +637,7 @@ async function confirmDelete() {
         showToast('Something went wrong.', 'error');
     }
 }
+
 </script>
+
 @endpush
