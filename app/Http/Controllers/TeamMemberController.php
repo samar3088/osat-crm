@@ -32,9 +32,13 @@ class TeamMemberController extends Controller
     public function list(Request $request): JsonResponse
     {
         $query = User::role('team_member')
-            ->with('assignedTo')
-            ->withCount('clients')
-            ->select('users.*');
+        ->with(['assignedTo:id,name'])
+        ->withCount('clients')
+        ->select([
+            'users.id', 'users.name', 'users.email',
+            'users.employee_code', 'users.work_type',
+            'users.assigned_to', 'users.is_active', 'users.created_at',
+        ]);
 
         return datatables()->of($query)
             ->addIndexColumn()

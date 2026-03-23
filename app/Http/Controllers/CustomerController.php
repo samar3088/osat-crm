@@ -29,8 +29,13 @@ class CustomerController extends Controller
     public function list(Request $request): JsonResponse
     {
         $user  = auth()->user();
-        $query = Client::with(['assignedTo'])
-            ->select('clients.*');
+        $query = Client::with(['assignedTo:id,name'])
+        ->select([
+            'clients.id', 'clients.client_name', 'clients.client_pan',
+            'clients.client_mobile', 'clients.client_email',
+            'clients.client_type', 'clients.assigned_to',
+            'clients.is_active', 'clients.created_at',
+        ]);
 
         // Data scoping
         if (!$user->isSuperAdmin()) {

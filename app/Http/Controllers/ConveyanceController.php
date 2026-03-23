@@ -32,8 +32,18 @@ class ConveyanceController extends Controller
     public function list(Request $request): JsonResponse
     {
         $user  = auth()->user();
-        $query = Conveyance::with(['user', 'actionedBy'])
-            ->select('conveyances.*');
+        $query = Conveyance::with([
+            'user:id,name',
+            'actionedBy:id,name',
+        ])
+        ->select([
+            'conveyances.id', 'conveyances.user_id',
+            'conveyances.conveyance_type', 'conveyances.conveyance_date',
+            'conveyances.amount', 'conveyances.remarks',
+            'conveyances.bill_path', 'conveyances.status',
+            'conveyances.action_remarks', 'conveyances.actioned_by',
+            'conveyances.actioned_at', 'conveyances.created_at',
+        ]);
 
         if (!$user->isSuperAdmin()) {
             $query->where('user_id', $user->id);

@@ -3,26 +3,41 @@
 namespace App\Exports;
 
 use App\Models\User;
-use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\FromQuery;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TeamMembersExport implements FromCollection, WithHeadings, WithStyles, WithColumnWidths
+class TeamMembersExport implements
+    FromQuery,
+    WithHeadings,
+    WithMapping,
+    WithStyles,
+    WithColumnWidths,
+    WithChunkReading
 {
     public function __construct(private array $filters = []) {}
 
-    public function collection()
+    public function chunkSize(): int { return 500; }
+
+    public function query()
     {
         $query = User::role('team_member')
-            ->with('assignedTo')
+            ->with('assignedTo:id,name')
             ->withCount('clients')
-            ->latest();
+            ->select([
+                'users.id','users.name','users.email',
+                'users.employee_code','users.work_type',
+                'users.assigned_to','users.is_active','users.created_at'
+            ]);
 
         if (!empty($this->filters['filter_status'])) {
-            $active = $this->filters['filter_status'] === 'Active' ? 1 : 0;
-            $query->where('is_active', $active);
+            $query->where('is_active',
+                $this->filters['filter_status'] === 'Active' ? 1 : 0
+            );
         }
         if (!empty($this->filters['filter_worktype'])) {
             $query->where('work_type', $this->filters['filter_worktype']);
@@ -33,22 +48,29 @@ class TeamMembersExport implements FromCollection, WithHeadings, WithStyles, Wit
             );
         }
 
-        return $query->get()->map(fn($m, $i) => [
-            'sno'           => $i + 1,
-            'name'          => $m->name,
-            'email'         => $m->email,
-            'employee_code' => $m->employee_code ?? '—',
-            'work_type'     => $m->work_type,
-            'assigned_to'   => $m->assignedTo?->name ?? '—',
-            'clients'       => $m->clients_count,
-            'status'        => $m->is_active ? 'Active' : 'Inactive',
-            'created_at'    => $m->created_at->format('d M Y'),
-        ]);
+        return $query;
+    }
+
+    public function map($m): array
+    {
+        static $i = 0;
+        $i++;
+        return [
+            $i,
+            $m->name,
+            $m->email,
+            $m->employee_code  ?? '—',
+            $m->work_type,
+            $m->assignedTo?->name ?? '—',
+            $m->clients_count,
+            $m->is_active ? 'Active' : 'Inactive',
+            $m->created_at->format('d M Y'),
+        ];
     }
 
     public function headings(): array
     {
-        return ['S.No', 'Name', 'Email', 'Employee Code', 'Work Type', 'Assigned To', 'Clients', 'Status', 'Created'];
+        return ['S.No','Name','Email','Employee Code','Work Type','Assigned To','Clients','Status','Created'];
     }
 
     public function styles(Worksheet $sheet): array
@@ -63,6 +85,6 @@ class TeamMembersExport implements FromCollection, WithHeadings, WithStyles, Wit
 
     public function columnWidths(): array
     {
-        return ['A' => 8, 'B' => 25, 'C' => 30, 'D' => 15, 'E' => 15, 'F' => 20, 'G' => 10, 'H' => 12, 'I' => 15];
+        return ['A'=>8,'B'=>25,'C'=>30,'D'=>15,'E'=>15,'F'=>20,'G'=>10,'H'=>12,'I'=>15];
     }
 }
