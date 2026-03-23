@@ -342,14 +342,8 @@ $(document).ready(function() {
             url:  '{{ route("conveyance.list") }}',
             type: 'GET',
             beforeSend: function() { showLoader(); },
-            complete: function(res) {
+            complete: function() {
                 hideLoader();
-                // Update stats
-                if (isSuperAdmin) {
-                    const data = res.responseJSON?.data ?? [];
-                    // Stats come from separate endpoint or count from response
-                    updateStats();
-                }
             },
             error: function() {
                 hideLoader();
@@ -384,14 +378,6 @@ $(document).ready(function() {
 
 // ── Stats ─────────────────────────────────────────────
 async function updateStats() {
-    try {
-        const res = await fetch('{{ route("conveyance.list") }}?stats_only=1&per_page=1', {
-            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }
-        });
-        // We'll get stats from a dedicated endpoint
-    } catch(e) {}
-
-    // Simple count from current visible data
     const res = await ajaxGet('{{ route("conveyance.stats") }}');
     if (res.success) {
         $('#statPending').text(res.pending);
@@ -562,7 +548,7 @@ async function confirmAction() {
             body: JSON.stringify({ action_remarks: remarks }),
         });
         const data = await res.json();
-eyLoader();
+        hideLoader();
         if (data.success) {
             closeModal('actionModal');
             showToast(data.message, 'success');

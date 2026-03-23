@@ -24,7 +24,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>Investment CRM</h1>
+            <h1>OSAT Wealth CRM</h1>
             <p>Conveyance Claim Update</p>
         </div>
         <div class="body">
