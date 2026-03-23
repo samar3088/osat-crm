@@ -41,7 +41,7 @@
 </div>
 
 {{-- ═══ TEAM STATS ═══ --}}
-<div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+<div class="grid grid-cols-4 gap-4 mb-6">
     <div class="bg-white rounded-card shadow-card p-4 flex items-center gap-3">
         <div class="w-10 h-10 rounded-[10px] bg-primary-light flex items-center justify-center">
             <svg class="w-5 h-5 stroke-primary fill-none stroke-2" viewBox="0 0 24 24">
