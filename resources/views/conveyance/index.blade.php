@@ -7,54 +7,45 @@
 
 {{-- ═══ HEADER ROW ═══ --}}
 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
+    <div class="flex items-center gap-3">
+        {{-- Export Excel --}}
+        <a href="{{ route('conveyance.export-excel') }}"
+           id="exportExcelBtn"
+           class="flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white
+                  rounded-input text-sm font-bold hover:bg-green-600
+                  transition-all hover:shadow-btn">
+            <svg class="w-4 h-4 stroke-white fill-none stroke-2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Export Excel
+        </a>
 
-    {{-- Stats (Super Admin only) --}}
-    @if(auth()->user()->isSuperAdmin())
-    <div class="flex items-center gap-4" id="conveyanceStats">
-        <div class="bg-white rounded-card px-5 py-3 shadow-card flex items-center gap-3">
-            <div class="w-8 h-8 rounded-[8px] bg-orange-50 flex items-center justify-center">
-                <svg class="w-4 h-4 stroke-orange-500 fill-none stroke-2" viewBox="0 0 24 24">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="12" y1="8" x2="12" y2="12"/>
-                    <line x1="12" y1="16" x2="12.01" y2="16"/>
-                </svg>
+        {{-- Stats (Super Admin only) --}}
+        @if(auth()->user()->isSuperAdmin())
+        <div class="flex items-center gap-3">
+            <div class="bg-white rounded-card px-4 py-2 shadow-card flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-orange-400"></div>
+                <span class="text-xs text-crm-gray">Pending:</span>
+                <span class="text-sm font-extrabold text-dark" id="statPending">—</span>
             </div>
-            <div>
-                <div class="text-lg font-extrabold text-dark" id="statPending">—</div>
-                <div class="text-xs text-crm-gray">Pending</div>
+            <div class="bg-white rounded-card px-4 py-2 shadow-card flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-green-500"></div>
+                <span class="text-xs text-crm-gray">Approved:</span>
+                <span class="text-sm font-extrabold text-dark" id="statApproved">—</span>
             </div>
-        </div>
-        <div class="bg-white rounded-card px-5 py-3 shadow-card flex items-center gap-3">
-            <div class="w-8 h-8 rounded-[8px] bg-green-50 flex items-center justify-center">
-                <svg class="w-4 h-4 stroke-green-500 fill-none stroke-2" viewBox="0 0 24 24">
-                    <polyline points="20 6 9 17 4 12"/>
-                </svg>
-            </div>
-            <div>
-                <div class="text-lg font-extrabold text-dark" id="statApproved">—</div>
-                <div class="text-xs text-crm-gray">Approved</div>
+            <div class="bg-white rounded-card px-4 py-2 shadow-card flex items-center gap-2">
+                <div class="w-2 h-2 rounded-full bg-red-500"></div>
+                <span class="text-xs text-crm-gray">Rejected:</span>
+                <span class="text-sm font-extrabold text-dark" id="statRejected">—</span>
             </div>
         </div>
-        <div class="bg-white rounded-card px-5 py-3 shadow-card flex items-center gap-3">
-            <div class="w-8 h-8 rounded-[8px] bg-red-50 flex items-center justify-center">
-                <svg class="w-4 h-4 stroke-red-500 fill-none stroke-2" viewBox="0 0 24 24">
-                    <line x1="18" y1="6" x2="6" y2="18"/>
-                    <line x1="6" y1="6" x2="18" y2="18"/>
-                </svg>
-            </div>
-            <div>
-                <div class="text-lg font-extrabold text-dark" id="statRejected">—</div>
-                <div class="text-xs text-crm-gray">Rejected</div>
-            </div>
-        </div>
+        @endif
     </div>
-    @endif
 
-    {{-- Submit Button (Team Member only) --}}
-    @if(!auth()->user()->isSuperAdmin())
-    <div></div>
-    @endif
-
+    {{-- Submit Claim Button --}}
     <button onclick="openCreateModal()"
             class="flex items-center gap-2 px-5 py-2.5 bg-primary text-white
                    rounded-input text-sm font-bold hover:bg-primary-dark
@@ -71,7 +62,7 @@
 <div class="bg-white rounded-card shadow-card p-4 mb-5">
     <div class="flex items-end gap-3 flex-wrap">
 
-        {{-- Status Filter --}}
+        {{-- Status --}}
         <div class="flex-1 min-w-[150px]">
             <label class="crm-label">Status</label>
             <select id="filterStatus" class="crm-input">
@@ -82,16 +73,7 @@
             </select>
         </div>
 
-        @if(auth()->user()->isSuperAdmin())
-        {{-- Team Member Filter --}}
-        <div class="flex-1 min-w-[150px]">
-            <label class="crm-label">Team Member</label>
-            <input type="text" id="filterMember" class="crm-input"
-                   placeholder="Search member..."/>
-        </div>
-        @endif
-
-        {{-- Type Filter --}}
+        {{-- Type --}}
         <div class="flex-1 min-w-[150px]">
             <label class="crm-label">Type</label>
             <select id="filterType" class="crm-input">
@@ -103,6 +85,15 @@
                 <option value="Other">Other</option>
             </select>
         </div>
+
+        {{-- Team Member (Super Admin only) --}}
+        @if(auth()->user()->isSuperAdmin())
+        <div class="flex-1 min-w-[150px]">
+            <label class="crm-label">Team Member</label>
+            <input type="text" id="filterMember" class="crm-input"
+                   placeholder="Search member..."/>
+        </div>
+        @endif
 
         {{-- Buttons --}}
         <div class="flex items-center gap-2 pb-0.5">
@@ -125,7 +116,6 @@
                 Reset
             </button>
         </div>
-
     </div>
 </div>
 
@@ -140,7 +130,7 @@
                 @endif
                 <th>Type</th>
                 <th>Date</th>
-                <th>Amount (₹)</th>
+                <th>Amount</th>
                 <th>Remarks</th>
                 <th>Bill</th>
                 <th>Status</th>
@@ -167,8 +157,6 @@
             </button>
         </div>
         <div class="p-6">
-
-            {{-- Row 1: Type + Date --}}
             <div class="grid grid-cols-2 gap-4 mb-4">
                 <div>
                     <label class="crm-label">Conveyance Type <span class="text-crm-danger">*</span></label>
@@ -187,8 +175,6 @@
                            max="{{ now()->toDateString() }}"/>
                 </div>
             </div>
-
-            {{-- Amount --}}
             <div class="mb-4">
                 <label class="crm-label">Amount (₹) <span class="text-crm-danger">*</span></label>
                 <div class="relative">
@@ -197,15 +183,11 @@
                            placeholder="0.00" min="1" step="0.01"/>
                 </div>
             </div>
-
-            {{-- Remarks --}}
             <div class="mb-4">
                 <label class="crm-label">Remarks</label>
                 <textarea id="convRemarks" class="crm-input h-20 resize-none"
                           placeholder="Describe the expense..."></textarea>
             </div>
-
-            {{-- Bill Upload --}}
             <div class="mb-6">
                 <label class="crm-label">Upload Bill / Receipt</label>
                 <div class="border-2 border-dashed border-crm-border rounded-input p-4 text-center
@@ -224,21 +206,15 @@
                     </p>
                 </div>
             </div>
-
-            {{-- Error --}}
             <div id="claimError"
                  class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-input">
                 <p class="text-sm text-red-600 font-semibold" id="claimErrorText"></p>
             </div>
-
             <div class="flex gap-3">
-                <button onclick="submitClaim()" class="crm-btn-primary flex-1">
-                    Submit Claim
-                </button>
+                <button onclick="submitClaim()" class="crm-btn-primary flex-1">Submit Claim</button>
                 <button onclick="closeModal('claimModal')"
                         class="flex-1 py-4 px-6 bg-crm-light text-crm-gray rounded-input
-                               border border-crm-border text-sm font-bold
-                               hover:bg-crm-border transition-all">
+                               border border-crm-border text-sm font-bold hover:bg-crm-border transition-all">
                     Cancel
                 </button>
             </div>
@@ -264,8 +240,6 @@
         <div class="p-6">
             <input type="hidden" id="actionConveyanceId"/>
             <input type="hidden" id="actionType"/>
-
-            {{-- Claim Summary --}}
             <div class="bg-crm-light rounded-input p-4 mb-4">
                 <div class="flex justify-between text-sm mb-2">
                     <span class="text-crm-gray font-medium">Team Member</span>
@@ -273,14 +247,13 @@
                 </div>
                 <div class="flex justify-between text-sm mb-2">
                     <span class="text-crm-gray font-medium">Type</span>
-                    <span class="font-bold text-dark" id="actionType2"></span>
+                    <span class="font-bold text-dark" id="actionTypeDisplay"></span>
                 </div>
                 <div class="flex justify-between text-sm">
                     <span class="text-crm-gray font-medium">Amount</span>
                     <span class="font-bold text-primary text-base" id="actionAmount"></span>
                 </div>
             </div>
-
             <div class="mb-6">
                 <label class="crm-label">
                     Remarks
@@ -290,20 +263,15 @@
                 <textarea id="actionRemarks" class="crm-input h-20 resize-none"
                           placeholder="Add remarks..."></textarea>
             </div>
-
             <div id="actionError"
                  class="hidden mb-4 p-3 bg-red-50 border border-red-200 rounded-input">
                 <p class="text-sm text-red-600 font-semibold" id="actionErrorText"></p>
             </div>
-
             <div class="flex gap-3">
-                <button onclick="confirmAction()" id="actionBtn" class="crm-btn-primary flex-1">
-                    Confirm
-                </button>
+                <button onclick="confirmAction()" id="actionBtn" class="crm-btn-primary flex-1">Confirm</button>
                 <button onclick="closeModal('actionModal')"
                         class="flex-1 py-4 px-6 bg-crm-light text-crm-gray rounded-input
-                               border border-crm-border text-sm font-bold
-                               hover:bg-crm-border transition-all">
+                               border border-crm-border text-sm font-bold hover:bg-crm-border transition-all">
                     Cancel
                 </button>
             </div>
@@ -323,9 +291,7 @@
             </svg>
         </div>
         <h3 class="text-base font-extrabold text-dark mb-2">Delete Claim?</h3>
-        <p class="text-sm text-crm-gray mb-6">
-            This will delete your pending claim. This action cannot be undone.
-        </p>
+        <p class="text-sm text-crm-gray mb-6">This will delete your pending claim.</p>
         <input type="hidden" id="deleteConveyanceId"/>
         <div class="flex gap-3">
             <button onclick="confirmDelete()"
@@ -335,8 +301,7 @@
             </button>
             <button onclick="closeModal('deleteModal')"
                     class="flex-1 py-3 bg-crm-light text-crm-gray rounded-input
-                           border border-crm-border text-sm font-bold
-                           hover:bg-crm-border transition-all">
+                           border border-crm-border text-sm font-bold hover:bg-crm-border transition-all">
                 Cancel
             </button>
         </div>
@@ -350,44 +315,40 @@
 const isSuperAdmin = {{ auth()->user()->isSuperAdmin() ? 'true' : 'false' }};
 let conveyanceTable;
 
-// ── Init DataTable ───────────────────────────────────
-const isSuperAdmin = {{ auth()->user()->isSuperAdmin() ? 'true' : 'false' }};
-
 $(document).ready(function() {
     const columns = [
         { data: 'DT_RowIndex', name: 'DT_RowIndex', orderable: false, searchable: false, width: '50px' },
     ];
 
     if (isSuperAdmin) {
-        columns.push({ data: 'team_member', name: 'team_member' });
+        columns.push({ data: 'team_member', name: 'team_member', title: 'Team Member' });
     }
 
     columns.push(
-        { data: 'type_badge',        name: 'type_badge',    orderable: false },
-        { data: 'conveyance_date',   name: 'conveyance_date' },
-        { data: 'amount_fmt',        name: 'amount',        orderable: true },
-        { data: 'remarks',           name: 'remarks' },
-        { data: 'bill_link',         name: 'bill_link',     orderable: false, searchable: false },
-        { data: 'status_badge',      name: 'status_badge',  orderable: false },
-        { data: 'action_remarks',    name: 'action_remarks' },
-        { data: 'actions',           name: 'actions',       orderable: false, searchable: false },
+        { data: 'type_badge',      name: 'type_badge',      title: 'Type',           orderable: false },
+        { data: 'conveyance_date', name: 'conveyance_date', title: 'Date' },
+        { data: 'amount_fmt',      name: 'amount',          title: 'Amount',          orderable: true },
+        { data: 'remarks',         name: 'remarks',         title: 'Remarks' },
+        { data: 'bill_link',       name: 'bill_link',       title: 'Bill',            orderable: false, searchable: false },
+        { data: 'status_badge',    name: 'status_badge',    title: 'Status',          orderable: false },
+        { data: 'action_remarks',  name: 'action_remarks',  title: 'Action Remarks' },
+        { data: 'actions',         name: 'actions',         title: 'Actions',         orderable: false, searchable: false },
     );
 
     conveyanceTable = $('#conveyanceTable').DataTable({
         processing: true,
         serverSide: true,
         ajax: {
-            url:        '{{ route("conveyance.list") }}',
-            type:       'GET',
+            url:  '{{ route("conveyance.list") }}',
+            type: 'GET',
             beforeSend: function() { showLoader(); },
-            complete:   function(res) {
+            complete: function(res) {
                 hideLoader();
-                // Update stats for Super Admin
-                if (isSuperAdmin && res.responseJSON?.stats) {
-                    const s = res.responseJSON.stats;
-                    $('#statPending').text(s.pending);
-                    $('#statApproved').text(s.approved);
-                    $('#statRejected').text(s.rejected);
+                // Update stats
+                if (isSuperAdmin) {
+                    const data = res.responseJSON?.data ?? [];
+                    // Stats come from separate endpoint or count from response
+                    updateStats();
                 }
             },
             error: function() {
@@ -401,19 +362,7 @@ $(document).ready(function() {
             }
         },
         columns: columns,
-        dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
-        buttons: [
-            {
-                extend: 'excelHtml5', text: 'Excel',
-                className: 'px-4 py-2 bg-green-50 text-green-600 rounded-input text-sm font-bold border border-green-200 hover:bg-green-100',
-                title: 'Conveyance Claims'
-            },
-            {
-                extend: 'pdfHtml5', text: 'PDF',
-                className: 'px-4 py-2 bg-red-50 text-red-500 rounded-input text-sm font-bold border border-red-200 hover:bg-red-100',
-                title: 'Conveyance Report'
-            },
-        ],
+        dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"l><"flex items-center gap-2"f>>rtip',
         pageLength: 15,
         lengthMenu: [[10, 15, 25, 50], [10, 15, 25, 50]],
         language: {
@@ -427,22 +376,62 @@ $(document).ready(function() {
         order: [[isSuperAdmin ? 3 : 2, 'desc']],
         responsive: true,
     });
+
+    // Load stats separately
+    if (isSuperAdmin) updateStats();
 });
 
-function refreshTable() { conveyanceTable.ajax.reload(null, false); }
+// ── Stats ─────────────────────────────────────────────
+async function updateStats() {
+    try {
+        const res = await fetch('{{ route("conveyance.list") }}?stats_only=1&per_page=1', {
+            headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content }
+        });
+        // We'll get stats from a dedicated endpoint
+    } catch(e) {}
 
-function applyFilters() { conveyanceTable.ajax.reload(null, false); }
+    // Simple count from current visible data
+    const res = await ajaxGet('{{ route("conveyance.stats") }}');
+    if (res.success) {
+        $('#statPending').text(res.pending);
+        $('#statApproved').text(res.approved);
+        $('#statRejected').text(res.rejected);
+    }
+}
+
+function refreshTable() {
+    conveyanceTable.ajax.reload(null, false);
+    if (isSuperAdmin) updateStats();
+}
+
+function updateExportLinks() {
+    const params = new URLSearchParams();
+    const status = $('#filterStatus').val();
+    const type   = $('#filterType').val();
+    const member = isSuperAdmin ? $('#filterMember').val() : '';
+
+    if (status) params.append('filter_status', status);
+    if (type)   params.append('filter_type', type);
+    if (member) params.append('filter_member', member);
+
+    const query = params.toString() ? '?' + params.toString() : '';
+    $('#exportExcelBtn').attr('href', '{{ route("conveyance.export-excel") }}' + query);
+}
+
+function applyFilters() {
+    conveyanceTable.ajax.reload(null, false);
+    updateExportLinks();
+}
 
 function resetFilters() {
     $('#filterStatus').val('');
     $('#filterType').val('');
     if (isSuperAdmin) $('#filterMember').val('');
     conveyanceTable.ajax.reload(null, false);
+    updateExportLinks();
 }
 
-function refreshTable() { conveyanceTable.ajax.reload(null, false); }
-
-// ── Modal Helpers ────────────────────────────────────
+// ── Modal Helpers ─────────────────────────────────────
 function closeModal(id) {
     document.getElementById(id).classList.add('hidden');
     document.body.style.overflow = '';
@@ -451,16 +440,13 @@ function openModal(id) {
     document.getElementById(id).classList.remove('hidden');
     document.body.style.overflow = 'hidden';
 }
-
-// ── Show File Name ───────────────────────────────────
 function showFileName(input) {
-    const text = document.getElementById('fileNameText');
-    text.textContent = input.files[0]
-        ? `Selected: ${input.files[0].name}`
+    document.getElementById('fileNameText').textContent = input.files[0]
+        ? 'Selected: ' + input.files[0].name
         : 'Click to upload JPG, PNG or PDF (max 2MB)';
 }
 
-// ── Create Modal ─────────────────────────────────────
+// ── Create Modal ──────────────────────────────────────
 function openCreateModal() {
     document.getElementById('convType').value    = '';
     document.getElementById('convDate').value    = '';
@@ -472,13 +458,12 @@ function openCreateModal() {
     openModal('claimModal');
 }
 
-// ── Submit Claim ─────────────────────────────────────
+// ── Submit Claim ──────────────────────────────────────
 async function submitClaim() {
-    const type    = document.getElementById('convType').value;
-    const date    = document.getElementById('convDate').value;
-    const amount  = document.getElementById('convAmount').value;
+    const type   = document.getElementById('convType').value;
+    const date   = document.getElementById('convDate').value;
+    const amount = document.getElementById('convAmount').value;
 
-    // Frontend validation
     if (!type) {
         document.getElementById('claimError').classList.remove('hidden');
         document.getElementById('claimErrorText').textContent = '• Please select a conveyance type.';
@@ -494,29 +479,22 @@ async function submitClaim() {
         document.getElementById('claimErrorText').textContent = '• Please enter a valid amount.';
         return;
     }
-
     document.getElementById('claimError').classList.add('hidden');
 
-    // Use FormData for file upload
     const formData = new FormData();
     formData.append('conveyance_type', type);
     formData.append('conveyance_date', date);
     formData.append('amount',          amount);
     formData.append('remarks',         document.getElementById('convRemarks').value);
     formData.append('_token',          document.querySelector('meta[name=csrf-token]').content);
-
     const bill = document.getElementById('convBill').files[0];
     if (bill) formData.append('bill', bill);
 
     showLoader();
     try {
-        const res  = await fetch('{{ route("conveyance.store") }}', {
-            method: 'POST',
-            body:   formData,
-        });
+        const res  = await fetch('{{ route("conveyance.store") }}', { method: 'POST', body: formData });
         const data = await res.json();
         hideLoader();
-
         if (data.success) {
             closeModal('claimModal');
             showToast(data.message, 'success');
@@ -525,44 +503,37 @@ async function submitClaim() {
             document.getElementById('claimError').classList.remove('hidden');
             if (data.errors) {
                 const allErrors = Object.values(data.errors).flat();
-                document.getElementById('claimErrorText').innerHTML =
-                    allErrors.map(e => `• ${e}`).join('<br>');
+                document.getElementById('claimErrorText').innerHTML = allErrors.map(e => `• ${e}`).join('<br>');
             } else {
                 document.getElementById('claimErrorText').textContent = data.message;
             }
         }
-    } catch(e) {
-        hideLoader();
-        showToast('Something went wrong.', 'error');
-    }
+    } catch(e) { hideLoader(); showToast('Something went wrong.', 'error'); }
 }
 
-// ── Approve / Reject Modal ───────────────────────────
+// ── Approve / Reject ──────────────────────────────────
 function openActionModal(id, action, member, type, amount) {
-    document.getElementById('actionConveyanceId').value  = id;
-    document.getElementById('actionType').value          = action;
-    document.getElementById('actionRemarks').value       = '';
+    document.getElementById('actionConveyanceId').value    = id;
+    document.getElementById('actionType').value            = action;
+    document.getElementById('actionRemarks').value         = '';
     document.getElementById('actionMemberName').textContent = member;
-    document.getElementById('actionType2').textContent   = type;
-    document.getElementById('actionAmount').textContent  = '₹' + amount;
+    document.getElementById('actionTypeDisplay').textContent = type;
+    document.getElementById('actionAmount').textContent    = '₹' + amount;
     document.getElementById('actionError').classList.add('hidden');
 
     if (action === 'approve') {
-        document.getElementById('actionModalTitle').textContent = 'Approve Claim';
-        document.getElementById('actionBtn').className =
-            'crm-btn-primary flex-1 !bg-green-500 hover:!bg-green-600';
-        document.getElementById('actionBtn').textContent = 'Approve';
+        document.getElementById('actionModalTitle').textContent  = 'Approve Claim';
+        document.getElementById('actionBtn').style.background    = '#10b981';
+        document.getElementById('actionBtn').textContent         = 'Approve';
         document.getElementById('remarksRequired').style.display = 'none';
         document.getElementById('remarksOptional').style.display = '';
     } else {
-        document.getElementById('actionModalTitle').textContent = 'Reject Claim';
-        document.getElementById('actionBtn').className =
-            'crm-btn-primary flex-1 !bg-red-500 hover:!bg-red-600';
-        document.getElementById('actionBtn').textContent = 'Reject';
+        document.getElementById('actionModalTitle').textContent  = 'Reject Claim';
+        document.getElementById('actionBtn').style.background    = '#ef4444';
+        document.getElementById('actionBtn').textContent         = 'Reject';
         document.getElementById('remarksRequired').style.display = '';
         document.getElementById('remarksOptional').style.display = 'none';
     }
-
     openModal('actionModal');
 }
 
@@ -571,13 +542,11 @@ async function confirmAction() {
     const action  = document.getElementById('actionType').value;
     const remarks = document.getElementById('actionRemarks').value.trim();
 
-    // Remarks required for rejection
     if (action === 'reject' && !remarks) {
         document.getElementById('actionError').classList.remove('hidden');
         document.getElementById('actionErrorText').textContent = 'Please provide a reason for rejection.';
         return;
     }
-
     document.getElementById('actionError').classList.add('hidden');
 
     showLoader();
@@ -592,8 +561,7 @@ async function confirmAction() {
             body: JSON.stringify({ action_remarks: remarks }),
         });
         const data = await res.json();
-        hideLoader();
-
+eyLoader();
         if (data.success) {
             closeModal('actionModal');
             showToast(data.message, 'success');
@@ -602,13 +570,10 @@ async function confirmAction() {
             document.getElementById('actionError').classList.remove('hidden');
             document.getElementById('actionErrorText').textContent = data.message;
         }
-    } catch(e) {
-        hideLoader();
-        showToast('Something went wrong.', 'error');
-    }
+    } catch(e) { hideLoader(); showToast('Something went wrong.', 'error'); }
 }
 
-// ── Delete Modal ─────────────────────────────────────
+// ── Delete ────────────────────────────────────────────
 function openDeleteModal(id) {
     document.getElementById('deleteConveyanceId').value = id;
     openModal('deleteModal');
@@ -632,12 +597,7 @@ async function confirmDelete() {
             showToast(data.message, 'success');
             refreshTable();
         } else showToast(data.message, 'error');
-    } catch(e) {
-        hideLoader();
-        showToast('Something went wrong.', 'error');
-    }
+    } catch(e) { hideLoader(); showToast('Something went wrong.', 'error'); }
 }
-
 </script>
-
 @endpush

@@ -8,6 +8,10 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
+use Yajra\DataTables\Facades\DataTables;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ConveyancesExport;
+
 class ConveyanceController extends Controller
 {
     public function __construct(
@@ -31,12 +35,11 @@ class ConveyanceController extends Controller
         $query = Conveyance::with(['user', 'actionedBy'])
             ->select('conveyances.*');
 
-        // Data scoping
         if (!$user->isSuperAdmin()) {
             $query->where('user_id', $user->id);
         }
 
-        return datatables()->of($query)
+        return DataTables::of($query)
             ->addIndexColumn()
             ->addColumn('team_member', fn($c) => e($c->user->name ?? '—'))
             ->addColumn('type_badge', function($c) {
@@ -50,6 +53,7 @@ class ConveyanceController extends Controller
                 $cls = $colors[$c->conveyance_type] ?? 'bg-gray-50 text-gray-500';
                 return "<span class=\"px-2 py-1 rounded-full text-xs font-bold {$cls}\">" . e($c->conveyance_type) . "</span>";
             })
+            ->addColumn('conveyance_date', fn($c) => $c->conveyance_date->format('d M Y'))
             ->addColumn('amount_fmt', fn($c) => '₹' . number_format($c->amount, 2))
             ->addColumn('bill_link', function($c) {
                 return $c->bill_path
@@ -73,34 +77,21 @@ class ConveyanceController extends Controller
             })
             ->addColumn('actions', function($c) use ($user) {
                 $actions = '';
-
                 if ($user->isSuperAdmin() && $c->status === 'pending') {
                     $actions .= '
-                        <button onclick="openActionModal(' . $c->id . ', \'approve\', \'' . e($c->user->name ?? '') . '\', \'' . e($c->conveyance_type) . '\', \'' . number_format($c->amount, 2) . '\')"
-                                title="Approve"
-                                class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center
-                                    hover:bg-green-500 hover:text-white text-green-500 transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <polyline points="20 6 9 17 4 12"/>
-                            </svg>
+                        <button onclick="openActionModal(' . $c->id . ',\'approve\',\'' . e($c->user->name ?? '') . '\',\'' . e($c->conveyance_type) . '\',\'' . number_format($c->amount, 2) . '\')"
+                                class="w-8 h-8 rounded-lg bg-green-50 flex items-center justify-center hover:bg-green-500 hover:text-white text-green-500 transition-all">
+                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
                         </button>
-                        <button onclick="openActionModal(' . $c->id . ', \'reject\', \'' . e($c->user->name ?? '') . '\', \'' . e($c->conveyance_type) . '\', \'' . number_format($c->amount, 2) . '\')"
-                                title="Reject"
-                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
-                                    hover:bg-red-500 hover:text-white text-red-500 transition-all">
-                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                                <line x1="18" y1="6" x2="6" y2="18"/>
-                                <line x1="6" y1="6" x2="18" y2="18"/>
-                            </svg>
+                        <button onclick="openActionModal(' . $c->id . ',\'reject\',\'' . e($c->user->name ?? '') . '\',\'' . e($c->conveyance_type) . '\',\'' . number_format($c->amount, 2) . '\')"
+                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center hover:bg-red-500 hover:text-white text-red-500 transition-all">
+                            <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
                         </button>';
                 }
-
                 if (!$user->isSuperAdmin() && $c->status === 'pending') {
                     $actions .= '
                         <button onclick="openDeleteModal(' . $c->id . ')"
-                                title="Delete"
-                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center
-                                    hover:bg-red-500 hover:text-white text-red-500 transition-all">
+                                class="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center hover:bg-red-500 hover:text-white text-red-500 transition-all">
                             <svg class="w-3.5 h-3.5 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
                                 <polyline points="3 6 5 6 21 6"/>
                                 <path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/>
@@ -108,20 +99,9 @@ class ConveyanceController extends Controller
                             </svg>
                         </button>';
                 }
-
                 if (!$actions) $actions = '<span class="text-xs text-crm-gray">—</span>';
                 return '<div class="flex items-center gap-2">' . $actions . '</div>';
             })
-            ->filterColumn('team_member', function($query, $keyword) {
-                $query->whereHas('user', fn($q) => $q->where('name', 'like', "%{$keyword}%"));
-            })
-            ->filterColumn('type_badge', function($query, $keyword) {
-                $query->where('conveyances.conveyance_type', 'like', "%{$keyword}%");
-            })
-            ->filterColumn('status_badge', function($query, $keyword) {
-                $query->where('conveyances.status', 'like', "%{$keyword}%");
-            })
-            ->rawColumns(['type_badge', 'bill_link', 'status_badge', 'actions'])
             ->filter(function($query) use ($request) {
                 if ($request->filter_status) {
                     $query->where('conveyances.status', $request->filter_status);
@@ -130,19 +110,21 @@ class ConveyanceController extends Controller
                     $query->where('conveyances.conveyance_type', $request->filter_type);
                 }
                 if ($request->filter_member) {
-                    $query->whereHas('user', function($q) use ($request) {
-                        $q->where('name', 'like', "%{$request->filter_member}%");
-                    });
+                    $query->whereHas('user', fn($q) =>
+                        $q->where('name', 'like', "%{$request->filter_member}%")
+                    );
                 }
             }, true)
-            ->with([
-                'stats' => [
-                    'pending'  => Conveyance::where('status', 'pending')->count(),
-                    'approved' => Conveyance::where('status', 'approved')->count(),
-                    'rejected' => Conveyance::where('status', 'rejected')->count(),
-                ]
-            ])
+            ->rawColumns(['type_badge', 'bill_link', 'status_badge', 'actions'])
             ->make(true);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        return Excel::download(
+            new ConveyancesExport(auth()->user(), $request->all()),
+            'conveyances-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 
     /**
@@ -244,5 +226,15 @@ class ConveyanceController extends Controller
         } catch (\Exception $e) {
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
+    }
+
+    public function stats(): JsonResponse
+    {
+        return response()->json([
+            'success'  => true,
+            'pending'  => Conveyance::where('status', 'pending')->count(),
+            'approved' => Conveyance::where('status', 'approved')->count(),
+            'rejected' => Conveyance::where('status', 'rejected')->count(),
+        ]);
     }
 }
