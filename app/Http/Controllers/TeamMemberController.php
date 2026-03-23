@@ -60,7 +60,9 @@ class TeamMemberController extends Controller
                             {$label}
                         </button>";
             })
+            ->addColumn('created_at', fn($m) => $m->created_at->format('d M Y'))
             ->addColumn('assigned_name', fn($m) => $m->assignedTo?->name ?? '—')
+            ->addColumn('clients_count', fn($m) => $m->clients_count ?? 0)
             ->addColumn('actions', function($m) {
                 return '
                     <div class="flex items-center gap-2">
@@ -309,5 +311,13 @@ class TeamMemberController extends Controller
         } while (User::where('employee_code', $newCode)->exists());
 
         return response()->json(['success' => true, 'code' => $newCode]);
+    }
+
+    public function exportExcel(Request $request)
+    {
+        return \Maatwebsite\Excel\Facades\Excel::download(
+            new \App\Exports\TeamMembersExport($request->all()),
+            'team-members-' . now()->format('Y-m-d') . '.xlsx'
+        );
     }
 }

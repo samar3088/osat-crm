@@ -9,6 +9,22 @@
 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
 
     <div class="flex items-center gap-3 flex-wrap">
+
+        {{-- Export Excel --}}
+        <a href="{{ route('team-members.export-excel') }}"
+        id="exportExcelBtn"
+        class="flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white
+                rounded-input text-sm font-bold hover:bg-green-600
+                transition-all hover:shadow-btn">
+            <svg class="w-4 h-4 stroke-white fill-none stroke-2" viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+            </svg>
+            Export Excel
+        </a>
+
         {{-- Download Sample Target --}}
         <a href="{{ route('team-members.sample-target') }}"
            class="flex items-center gap-2 px-4 py-2.5 bg-primary-light text-primary
@@ -426,13 +442,31 @@ $(document).ready(function() {
 
 function refreshTable() { membersTable.ajax.reload(null, false); }
 
-function applyFilters() { membersTable.ajax.reload(null, false); }
+function updateExportLinks() {
+    const params = new URLSearchParams();
+    const status   = $('#filterStatus').val();
+    const worktype = $('#filterWorkType').val();
+    const assigned = $('#filterAssigned').val();
+
+    if (status)   params.append('filter_status', status);
+    if (worktype) params.append('filter_worktype', worktype);
+    if (assigned) params.append('filter_assigned', assigned);
+
+    const query = params.toString() ? '?' + params.toString() : '';
+    $('#exportExcelBtn').attr('href', '{{ route("team-members.export-excel") }}' + query);
+}
+
+function applyFilters() {
+    membersTable.ajax.reload(null, false);
+    updateExportLinks();
+}
 
 function resetFilters() {
     $('#filterStatus').val('');
     $('#filterWorkType').val('');
     $('#filterAssigned').val('');
     membersTable.ajax.reload(null, false);
+    updateExportLinks();
 }
 
 // ── Refresh table after any action ───────────────────
