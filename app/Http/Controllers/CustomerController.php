@@ -287,26 +287,4 @@ class CustomerController extends Controller
             'customers-' . now()->format('Y-m-d') . '.xlsx'
         );
     }
-
-    public function exportPdf(Request $request)
-    {
-        $user  = auth()->user();
-        $query = Client::with('assignedTo')->latest();
-
-        if (!$user->isSuperAdmin()) {
-            $query->where('assigned_to', $user->id);
-        }
-
-        // Apply same filters
-        if ($request->filter_type) {
-            $query->where('client_type', $request->filter_type);
-        }
-        if ($request->filter_status) {
-            $query->where('is_active', $request->filter_status === 'Active' ? 1 : 0);
-        }
-
-        $clients = $query->get();
-        $pdf     = \Barryvdh\DomPDF\Facade\Pdf::loadView('customers.pdf', compact('clients'));
-        return $pdf->download('customers-' . now()->format('Y-m-d') . '.pdf');
-    }
 }

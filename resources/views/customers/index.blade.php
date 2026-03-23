@@ -9,26 +9,19 @@
 <div class="flex items-center justify-between mb-6 flex-wrap gap-4">
     <div class="flex items-center gap-3">
         {{-- Export Excel --}}
-        <button id="exportExcel"
-                class="flex items-center gap-2 px-4 py-2.5 bg-green-50 text-green-600
-                       rounded-input text-sm font-bold hover:bg-green-100 transition-all border border-green-200">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
+        <a href="{{ route('customers.export-excel') }}"
+        id="exportExcelBtn"
+        class="flex items-center gap-2 px-5 py-2.5 bg-green-500 text-white
+                rounded-input text-sm font-bold hover:bg-green-600
+                transition-all hover:shadow-btn">
+            <svg class="w-4 h-4 stroke-white fill-none stroke-2" viewBox="0 0 24 24">
                 <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
                 <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
             </svg>
             Export Excel
-        </button>
-
-        {{-- Export PDF --}}
-        <button id="exportPdf"
-                class="flex items-center gap-2 px-4 py-2.5 bg-red-50 text-red-500
-                       rounded-input text-sm font-bold hover:bg-red-100 transition-all border border-red-200">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2" viewBox="0 0 24 24">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-            </svg>
-            Export PDF
-        </button>
+        </a>
     </div>
 
     {{-- Add Button --}}
@@ -333,17 +326,61 @@ $(document).ready(function() {
             }
         },
         columns: [
-            { data: 'DT_RowIndex',   name: 'DT_RowIndex',   orderable: false, searchable: false, width: '50px' },
-            { data: 'name_email',    name: 'name_email' },
-            { data: 'client_pan',    name: 'client_pan' },
-            { data: 'client_mobile', name: 'client_mobile' },
-            { data: 'type_badge',    name: 'type_badge',    orderable: false },
-            { data: 'assigned_name', name: 'assigned_name', orderable: false },
-            { data: 'status_badge',  name: 'status_badge',  orderable: false },
-            { data: 'actions',       name: 'actions',       orderable: false, searchable: false },
+            { 
+                data: 'DT_RowIndex',   
+                name: 'DT_RowIndex',   
+                orderable: false, 
+                searchable: false, 
+                width: '50px' 
+            },
+            { 
+                data: 'name_email',    
+                name: 'name_email',    
+                title: 'Client Name'
+            },
+            { 
+                data: 'client_pan',    
+                name: 'client_pan',    
+                title: 'PAN'
+            },
+            { 
+                data: 'client_mobile', 
+                name: 'client_mobile', 
+                title: 'Mobile'
+            },
+            { 
+                data: 'client_email',  
+                name: 'client_email',  
+                title: 'Email'
+            },
+            { 
+                data: 'type_badge',    
+                name: 'type_badge',    
+                title: 'Type',
+                orderable: false 
+            },
+            { 
+                data: 'assigned_name', 
+                name: 'assigned_name', 
+                title: 'Assigned To',
+                orderable: false 
+            },
+            { 
+                data: 'status_badge',  
+                name: 'status_badge',  
+                title: 'Status',
+                orderable: false 
+            },
+            { 
+                data: 'actions',       
+                name: 'actions',       
+                title: 'Actions',
+                orderable: false, 
+                searchable: false 
+            },
         ],
-        dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
-        buttons: [
+        //dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
+        /* buttons: [
             {
                 extend:    'excelHtml5',
                 text:      'Excel',
@@ -356,7 +393,7 @@ $(document).ready(function() {
                 className: 'px-4 py-2 bg-red-50 text-red-500 rounded-input text-sm font-bold border border-red-200 hover:bg-red-100',
                 title:     'Customers Report'
             },
-        ],
+        ], */
         pageLength: 15,
         lengthMenu: [[10, 15, 25, 50], [10, 15, 25, 50]],
         language: {
@@ -378,18 +415,17 @@ $(document).ready(function() {
 function refreshTable() { customersTable.ajax.reload(null, false); }
 
 function updateExportLinks() {
+    const params = new URLSearchParams();
     const type     = $('#filterType').val();
     const status   = $('#filterStatus').val();
     const assigned = isAdmin ? $('#filterAssigned').val() : '';
 
-    const params = new URLSearchParams();
     if (type)     params.append('filter_type', type);
     if (status)   params.append('filter_status', status);
     if (assigned) params.append('filter_assigned', assigned);
 
     const query = params.toString() ? '?' + params.toString() : '';
     $('#exportExcelBtn').attr('href', '{{ route("customers.export-excel") }}' + query);
-    $('#exportPdfBtn').attr('href',   '{{ route("customers.export-pdf") }}'   + query);
 }
 
 function applyFilters() {
