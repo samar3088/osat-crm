@@ -411,8 +411,9 @@ $(document).ready(function() {
             { data: 'created_at',    name: 'created_at' },
             { data: 'actions',       name: 'actions', orderable: false, searchable: false },
         ],
-        dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
-        buttons: [
+        //dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
+        dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"l><"flex items-center gap-2"f>>rtip',
+        /* buttons: [
             {
                 extend: 'excelHtml5', text: 'Excel',
                 className: 'px-4 py-2 bg-green-50 text-green-600 rounded-input text-sm font-bold border border-green-200 hover:bg-green-100',
@@ -423,7 +424,7 @@ $(document).ready(function() {
                 className: 'px-4 py-2 bg-red-50 text-red-500 rounded-input text-sm font-bold border border-red-200 hover:bg-red-100',
                 title: 'Team Members Report'
             },
-        ],
+        ], */
         pageLength: 15,
         lengthMenu: [[10, 15, 25, 50], [10, 15, 25, 50]],
         language: {

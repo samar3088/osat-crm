@@ -380,6 +380,7 @@ $(document).ready(function() {
             },
         ],
         //dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"lB><"flex items-center gap-2"f>>rtip',
+        dom: '<"flex items-center justify-between mb-4"<"flex items-center gap-2"l><"flex items-center gap-2"f>>rtip',
         /* buttons: [
             {
                 extend:    'excelHtml5',
