@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Models\User;
 use App\Models\UserTarget;
 use App\Models\AuditLog;
+use App\Mail\TeamMemberWelcomeMail;
+use Illuminate\Support\Facades\Mail;
 
 class TeamMemberService
 {
@@ -25,6 +27,17 @@ class TeamMemberService
 
         // Assign role
         $user->assignRole('team_member');
+
+        // Send welcome email with credentials
+        try {
+            Mail::to($user->email)->send(new TeamMemberWelcomeMail($user, $data['password']));
+        } catch (\Exception $e) {
+            // Log mail failure but don't stop account creation
+            \App\Models\SystemLog::error(
+                "Welcome email failed for {$user->email}: " . $e->getMessage(),
+                'team_members.create'
+            );
+        }
 
         // Log action
         AuditLog::record(

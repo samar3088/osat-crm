@@ -41,14 +41,26 @@ class CustomerController extends Controller
      */
     public function store(Request $request): JsonResponse
     {
+        $messages = [
+            'client_name.required'  => 'Client name is required.',
+            'client_mobile.min'     => 'Mobile number must be at least 10 digits.',
+            'client_mobile.max'     => 'Mobile number cannot exceed 15 digits.',
+            'client_mobile.regex'   => 'Please enter a valid mobile number.',
+            'client_email.email'    => 'Please enter a valid email address.',
+            'assigned_to.exists'    => 'Selected team member does not exist.',
+        ];
+
         $request->validate([
             'client_name'   => ['required', 'string', 'max:150'],
             'client_pan'    => ['nullable', 'string', 'max:20'],
-            'client_mobile' => ['nullable', 'string', 'max:20'],
+            'client_mobile' => [
+                'nullable', 'string', 'min:10', 'max:15',
+                'regex:/^[0-9+\-\s()]+$/',
+            ],
             'client_email'  => ['nullable', 'email', 'max:150'],
             'client_type'   => ['nullable', 'string'],
             'assigned_to'   => ['nullable', 'exists:users,id'],
-        ]);
+        ], $messages);
 
         try {
             $client = $this->service->create($request->all());
@@ -77,7 +89,6 @@ class CustomerController extends Controller
                 'client_type'   => $customer->client_type,
                 'source_detail' => $customer->source_detail,
                 'date_of_birth' => $customer->date_of_birth?->format('Y-m-d'),
-                'follow_date'   => $customer->follow_date?->format('Y-m-d'),
                 'full_remarks'  => $customer->full_remarks,
                 'assigned_to'   => $customer->assigned_to,
                 'is_active'     => $customer->is_active,
@@ -90,10 +101,26 @@ class CustomerController extends Controller
      */
     public function update(Request $request, Client $customer): JsonResponse
     {
+        $messages = [
+            'client_name.required'   => 'Client name is required.',
+            'client_mobile.min'      => 'Mobile number must be at least 10 digits.',
+            'client_mobile.max'      => 'Mobile number cannot exceed 15 digits.',
+            'client_mobile.regex'    => 'Please enter a valid mobile number.',
+            'client_email.email'     => 'Please enter a valid email address.',
+            'client_pan.max'         => 'PAN cannot exceed 20 characters.',
+            'assigned_to.exists'     => 'Selected team member does not exist.',
+        ];
+        
         $request->validate([
             'client_name'   => ['required', 'string', 'max:150'],
             'client_pan'    => ['nullable', 'string', 'max:20'],
-            'client_mobile' => ['nullable', 'string', 'max:20'],
+            'client_mobile' => [
+                'nullable',
+                'string',
+                'min:10',
+                'max:15',
+                'regex:/^[0-9+\-\s()]+$/', // allows +91, spaces, dashes
+            ],
             'client_email'  => ['nullable', 'email', 'max:150'],
             'client_type'   => ['nullable', 'string'],
             'assigned_to'   => ['nullable', 'exists:users,id'],

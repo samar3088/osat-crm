@@ -43,4 +43,20 @@
     @apply absolute left-3 top-1/2 -translate-y-1/2
            w-4 h-4 stroke-crm-gray;
   }
+
+  @layer components {
+
+    /* existing classes ... */
+  
+    /* ── Select without icon ── */
+    select.crm-input {
+      @apply pl-4 cursor-pointer;
+      background-image: none;
+    }
+  
+    /* ── Textarea ── */
+    textarea.crm-input {
+      @apply pl-4 pt-3;
+    }
+  }
 }

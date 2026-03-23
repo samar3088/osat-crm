@@ -28,7 +28,6 @@ class Client extends Model
         'full_remarks',
         'latest_remarks',
         'latest_remarks_updated_on',
-        'follow_date',
         'client_existing',
         'assigned_to',
         'service_team_id',
@@ -41,7 +40,6 @@ class Client extends Model
     protected $casts = [
         'client_existing'           => 'boolean',
         'is_active'                 => 'boolean',
-        'follow_date'               => 'date',
         'date_first_added'          => 'date',
         'latest_remarks_updated_on' => 'datetime',
         'equity'                    => 'decimal:2',

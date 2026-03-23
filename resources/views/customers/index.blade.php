@@ -58,7 +58,6 @@
                 <th>Email</th>
                 <th>Type</th>
                 <th>Assigned To</th>
-                <th>Follow Up</th>
                 <th>Status</th>
                 <th>Actions</th>
             </tr>
@@ -160,10 +159,6 @@
                 <div>
                     <label class="crm-label">Date of Birth</label>
                     <input type="date" id="clientDob" class="crm-input"/>
-                </div>
-                <div>
-                    <label class="crm-label">Follow Up Date</label>
-                    <input type="date" id="clientFollowDate" class="crm-input"/>
                 </div>
                 <div>
                     <label class="crm-label">Assign To</label>
@@ -310,7 +305,6 @@ $(document).ready(function() {
                 }
             },
             { data: 'assigned_to' },
-            { data: 'follow_date' },
             {
                 data:   'is_active',
                 render: (data, type, row) => `
@@ -415,7 +409,6 @@ function openCreateModal() {
     document.getElementById('clientEmail').value       = '';
     document.getElementById('clientSource').value      = '';
     document.getElementById('clientDob').value         = '';
-    document.getElementById('clientFollowDate').value  = '';
     document.getElementById('clientAssignedTo').value  = '';
     document.getElementById('clientRemarks').value     = '';
     document.getElementById('statusRow').style.display = 'none';
@@ -437,7 +430,6 @@ async function openEditModal(id) {
     document.getElementById('clientEmail').value            = c.client_email   ?? '';
     document.getElementById('clientSource').value           = c.source_detail  ?? '';
     document.getElementById('clientDob').value              = c.date_of_birth  ?? '';
-    document.getElementById('clientFollowDate').value       = c.follow_date    ?? '';
     document.getElementById('clientAssignedTo').value       = c.assigned_to    ?? '';
     document.getElementById('clientRemarks').value          = c.full_remarks   ?? '';
     document.getElementById('clientStatus').value           = c.is_active ? '1' : '0';
@@ -458,11 +450,36 @@ async function saveCustomer() {
         client_email:   document.getElementById('clientEmail').value,
         source_detail:  document.getElementById('clientSource').value,
         date_of_birth:  document.getElementById('clientDob').value       || null,
-        follow_date:    document.getElementById('clientFollowDate').value || null,
         assigned_to:    document.getElementById('clientAssignedTo').value || null,
         full_remarks:   document.getElementById('clientRemarks').value,
         is_active:      document.getElementById('clientStatus')?.value   ?? '1',
     };
+
+    // ── Frontend Validation ──────────────────────────
+    const name = document.getElementById('clientName').value.trim();
+    const mobile = document.getElementById('clientMobile').value.trim();
+    const email  = document.getElementById('clientEmail').value.trim();
+
+    if (!name) {
+        document.getElementById('modalError').classList.remove('hidden');
+        document.getElementById('modalErrorText').textContent = '• Client name is required.';
+        return;
+    }
+
+    if (mobile && mobile.replace(/\D/g, '').length < 10) {
+        document.getElementById('modalError').classList.remove('hidden');
+        document.getElementById('modalErrorText').textContent = '• Mobile number must be at least 10 digits.';
+        return;
+    }
+
+    if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('modalError').classList.remove('hidden');
+        document.getElementById('modalErrorText').textContent = '• Please enter a valid email address.';
+        return;
+    }
+
+    // Hide error if all valid
+    document.getElementById('modalError').classList.add('hidden');
 
     showLoader();
     try {

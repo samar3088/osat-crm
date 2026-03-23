@@ -507,6 +507,45 @@ async function saveMember() {
         role:          'team_member',
     };
 
+    // ── Frontend Validation ──────────────────────────
+    const name     = document.getElementById('memberName').value.trim();
+    const email    = document.getElementById('memberEmail').value.trim();
+    const password = document.getElementById('memberPassword').value.trim();
+    const empCode  = document.getElementById('memberEmpCode').value.trim();
+
+    if (!name) {
+        document.getElementById('modalError').classList.remove('hidden');
+        document.getElementById('modalErrorText').textContent = '• Full name is required.';
+        return;
+    }
+
+    if (!email) {
+        document.getElementById('modalError').classList.remove('hidden');
+        document.getElementById('modalErrorText').textContent = '• Email address is required.';
+        return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        document.getElementById('modalError').classList.remove('hidden');
+        document.getElementById('modalErrorText').textContent = '• Please enter a valid email address.';
+        return;
+    }
+
+    if (!isEdit && !password) {
+        document.getElementById('modalError').classList.remove('hidden');
+        document.getElementById('modalErrorText').textContent = '• Password is required for new team members.';
+        return;
+    }
+
+    if (password && password.length < 8) {
+        document.getElementById('modalError').classList.remove('hidden');
+        document.getElementById('modalErrorText').textContent = '• Password must be at least 8 characters.';
+        return;
+    }
+
+    // Hide error if all valid
+    document.getElementById('modalError').classList.add('hidden');
+
     showLoader();
     try {
         const response = await fetch(isEdit ? `/team-members/${id}` : '{{ route("team-members.store") }}', {

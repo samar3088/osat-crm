@@ -42,7 +42,6 @@ class CustomerService
             'assigned_to'   => $c->assignedTo?->name ?? '—',
             'assigned_to_id'=> $c->assigned_to,
             'is_active'     => $c->is_active,
-            'follow_date'   => $c->follow_date?->format('d M Y') ?? '—',
             'created_at'    => $c->created_at->format('d M Y'),
         ]);
     }
@@ -61,7 +60,6 @@ class CustomerService
             'client_type'    => $data['client_type']    ?? null,
             'source_detail'  => $data['source_detail']  ?? null,
             'date_of_birth'  => $data['date_of_birth']  ?? null,
-            'follow_date'    => $data['follow_date']    ?? null,
             'full_remarks'   => $data['full_remarks']   ?? null,
             'latest_remarks' => $data['full_remarks']   ?? null,
             'assigned_to'    => $data['assigned_to']    ?? ($user->isTeamMember() ? $user->id : null),
@@ -92,7 +90,6 @@ class CustomerService
             'client_type'    => $data['client_type']    ?? null,
             'source_detail'  => $data['source_detail']  ?? null,
             'date_of_birth'  => $data['date_of_birth']  ?? null,
-            'follow_date'    => $data['follow_date']    ?? null,
             'full_remarks'   => $data['full_remarks']   ?? null,
             'latest_remarks' => $data['full_remarks']   ?? null,
             'assigned_to'    => $data['assigned_to']    ?? null,

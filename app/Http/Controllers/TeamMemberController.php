@@ -221,18 +221,22 @@ class TeamMemberController extends Controller
     public function generateCode(): JsonResponse
     {
         $last = User::whereNotNull('employee_code')
+            ->where('employee_code', 'like', 'EMP-%')
             ->orderByDesc('id')
             ->value('employee_code');
 
-        // Extract number from last code e.g. EMP-001 → 1
-        $lastNum = $last ? (int) filter_var($last, FILTER_SANITIZE_NUMBER_INT) : 0;
-        $newCode = 'EMP-' . str_pad($lastNum + 1, 3, '0', STR_PAD_LEFT);
+        // Extract number from last code e.g. EMP-01 → 1
+        $lastNum = 0;
+        if ($last) {
+            $parts   = explode('-', $last);
+            $lastNum = (int) end($parts);
+        }
 
-        // Ensure uniqueness
-        while (User::where('employee_code', $newCode)->exists()) {
+        // Generate next code with 2 digit padding
+        do {
             $lastNum++;
             $newCode = 'EMP-' . str_pad($lastNum, 3, '0', STR_PAD_LEFT);
-        }
+        } while (User::where('employee_code', $newCode)->exists());
 
         return response()->json(['success' => true, 'code' => $newCode]);
     }

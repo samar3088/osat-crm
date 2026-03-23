@@ -28,7 +28,6 @@ return new class extends Migration
             $table->text('full_remarks')->nullable();
             $table->text('latest_remarks')->nullable();
             $table->timestamp('latest_remarks_updated_on')->nullable();
-            $table->date('follow_date')->nullable();
             $table->boolean('client_existing')->default(false);
             $table->foreignId('assigned_to')
                   ->nullable()

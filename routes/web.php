@@ -10,6 +10,7 @@ use App\Http\Controllers\Auth\ResetPasswordController;
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ConveyanceController;
 
 // ── Public Routes ────────────────────────────────────
 Route::get('/', fn() => redirect()->route('login'));
@@ -58,19 +59,24 @@ Route::middleware(['auth'])->group(function () {
 
     // Team Members — Super Admin only
     Route::middleware(['role:super_admin'])->group(function () {
+
+        // ── Static routes FIRST ──────────────────────────
         Route::get('/team-members',                        [TeamMemberController::class, 'index'])->name('team-members.index');
         Route::get('/team-members/list',                   [TeamMemberController::class, 'list'])->name('team-members.list');
+        Route::get('/team-members/generate-code',          [TeamMemberController::class, 'generateCode'])->name('team-members.generate-code');
+        Route::get('/team-members/sample-target',          [TeamMemberController::class, 'downloadSampleTarget'])->name('team-members.sample-target');
+        Route::post('/team-members/upload-target',         [TeamMemberController::class, 'uploadTarget'])->name('team-members.upload-target');
         Route::post('/team-members',                       [TeamMemberController::class, 'store'])->name('team-members.store');
+    
+        // ── Dynamic routes AFTER ─────────────────────────
         Route::get('/team-members/{teamMember}',           [TeamMemberController::class, 'show'])->name('team-members.show');
         Route::put('/team-members/{teamMember}',           [TeamMemberController::class, 'update'])->name('team-members.update');
         Route::patch('/team-members/{teamMember}/status',  [TeamMemberController::class, 'toggleStatus'])->name('team-members.toggle-status');
         Route::delete('/team-members/{teamMember}',        [TeamMemberController::class, 'destroy'])->name('team-members.destroy');
         Route::post('/team-members/{teamMember}/target',   [TeamMemberController::class, 'setTarget'])->name('team-members.set-target');
-    
-        // Keep server-side target upload
-        Route::get('/team-members/sample-target',          [TeamMemberController::class, 'downloadSampleTarget'])->name('team-members.sample-target');
-        Route::post('/team-members/upload-target',         [TeamMemberController::class, 'uploadTarget'])->name('team-members.upload-target');
-        Route::get('/team-members/generate-code', [TeamMemberController::class, 'generateCode'])->name('team-members.generate-code');
+
+        Route::post('/conveyance/{conveyance}/approve', [ConveyanceController::class, 'approve'])->name('conveyance.approve');
+        Route::post('/conveyance/{conveyance}/reject',  [ConveyanceController::class, 'reject'])->name('conveyance.reject');
     });
 
     // Customer dashboard
@@ -84,5 +90,11 @@ Route::middleware(['auth'])->group(function () {
     Route::patch('/customers/{customer}/status',    [CustomerController::class, 'toggleStatus'])->name('customers.toggle-status');
     Route::delete('/customers/{customer}',          [CustomerController::class, 'destroy'])->name('customers.destroy');
     Route::get('/customers/{customer}/profile',     [CustomerController::class, 'profile'])->name('customers.profile');
+
+    // ── Conveyance ────────────────────────────────────────
+    Route::get('/conveyance',                          [ConveyanceController::class, 'index'])->name('conveyance.index');
+    Route::get('/conveyance/list',                     [ConveyanceController::class, 'list'])->name('conveyance.list');
+    Route::post('/conveyance',                         [ConveyanceController::class, 'store'])->name('conveyance.store');
+    Route::delete('/conveyance/{conveyance}',          [ConveyanceController::class, 'destroy'])->name('conveyance.destroy');
 
 });
