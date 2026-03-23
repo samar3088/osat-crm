@@ -85,171 +85,174 @@
         {{-- Navigation --}}
         <nav class="flex-1 px-3 py-4 overflow-y-auto">
 
-        {{-- MAIN --}}
-        <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 sidebar-text sidebar-section">Main</div>
+            {{-- MAIN --}}
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-1 sidebar-text sidebar-section">Main</div>
 
-        <a href="{{ route('dashboard') }}" title="Dashboard"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                {{ request()->routeIs('dashboard') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
-                <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Dashboard</span>
-        </a>
+            {{-- Dashboard --}}
+            <a href="{{ route('dashboard') }}" title="Dashboard"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    {{ request()->routeIs('dashboard') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/>
+                    <rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Dashboard</span>
+            </a>
 
-        {{-- AUM & Targets --}}
-        @can('view aum')
-        <a href="#" title="AUM & Targets"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                text-white/60 hover:bg-white/[0.07] hover:text-white">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <line x1="18" y1="20" x2="18" y2="10"/>
-                <line x1="12" y1="20" x2="12" y2="4"/>
-                <line x1="6" y1="20" x2="6" y2="14"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">AUM & Targets</span>
-        </a>
-        @endcan
+            {{-- AUM & Targets --}}
+            @can('view aum')
+            <a href="#" title="AUM & Targets"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    text-white/60 hover:bg-white/[0.07] hover:text-white">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <line x1="18" y1="20" x2="18" y2="10"/>
+                    <line x1="12" y1="20" x2="12" y2="4"/>
+                    <line x1="6" y1="20" x2="6" y2="14"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">AUM & Targets</span>
+            </a>
+            @endcan
 
-        {{-- MANAGEMENT --}}
-        <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Management</div>
+            {{-- MANAGEMENT DROPDOWN --}}
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-1 mt-3 sidebar-text sidebar-section">Management</div>
 
-        {{-- Teams — Super Admin only --}}
-        @if(auth()->user()->isSuperAdmin())
-        <a href="{{ route('teams.index') }}" title="Teams"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                {{ request()->routeIs('teams.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Teams</span>
-        </a>
-        @endif
+            {{-- Teams — Super Admin only --}}
+            @if(auth()->user()->isSuperAdmin())
+            <a href="{{ route('teams.index') }}" title="Teams"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    {{ request()->routeIs('teams.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Teams</span>
+            </a>
+            @endif
 
-        {{-- Team Members --}}
-        @can('view team_members')
-        <a href="{{ route('team-members.index') }}" title="Team Members"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                {{ request()->routeIs('team-members.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
-                <circle cx="9" cy="7" r="4"/>
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Team Members</span>
-        </a>
-        @endcan
+            {{-- Team Members --}}
+            @can('view team_members')
+            <a href="{{ route('team-members.index') }}" title="Team Members"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    {{ request()->routeIs('team-members.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                    <circle cx="9" cy="7" r="4"/>
+                    <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                    <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Team Members</span>
+            </a>
+            @endcan
 
-        {{-- Customers --}}
-        @can('view clients')
-        <a href="{{ route('customers.index') }}" title="Customers"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                {{ request()->routeIs('customers.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Customers</span>
-        </a>
-        @endcan
+            {{-- Team Members Activity --}}
+            @can('view rm_activities')
+            <a href="#" title="Team Members Activity"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    text-white/60 hover:bg-white/[0.07] hover:text-white">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Team Members Activity</span>
+            </a>
+            @endcan
 
-        {{-- Activities --}}
-        @can('view activities')
-        <a href="#" title="Activities"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                text-white/60 hover:bg-white/[0.07] hover:text-white">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Activities</span>
-        </a>
-        @endcan
+            {{-- Conveyance --}}
+            @can('view conveyance')
+            <a href="{{ route('conveyance.index') }}" title="Conveyance"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    {{ request()->routeIs('conveyance.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <rect x="1" y="3" width="15" height="13"/>
+                    <path d="M16 8h4l3 3v5h-7V8z"/>
+                    <circle cx="5.5" cy="18.5" r="2.5"/>
+                    <circle cx="18.5" cy="18.5" r="2.5"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Conveyance</span>
+            </a>
+            @endcan
 
-        {{-- RM Activity --}}
-        @can('view rm_activities')
-        <a href="#" title="RM Activity"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                text-white/60 hover:bg-white/[0.07] hover:text-white">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
-                <circle cx="12" cy="7" r="4"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">RM Activity</span>
-        </a>
-        @endcan
+            {{-- CUSTOMERS SECTION --}}
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-1 mt-3 sidebar-text sidebar-section">Customers</div>
 
-        {{-- Conveyance --}}
-        @can('view conveyance')
-        <a href="{{ route('conveyance.index') }}" title="Conveyance"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                {{ request()->routeIs('conveyance.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <rect x="1" y="3" width="15" height="13"/>
-                <path d="M16 8h4l3 3v5h-7V8z"/>
-                <circle cx="5.5" cy="18.5" r="2.5"/>
-                <circle cx="18.5" cy="18.5" r="2.5"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Conveyance</span>
-        </a>
-        @endcan
+            {{-- Customers --}}
+            @can('view clients')
+            <a href="{{ route('customers.index') }}" title="Customers"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    {{ request()->routeIs('customers.*') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Customers</span>
+            </a>
+            @endcan
 
-        {{-- REPORTS --}}
-        @can('view reports')
-        <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Reports</div>
-        <a href="#" title="Reports"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                text-white/60 hover:bg-white/[0.07] hover:text-white">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                <polyline points="14 2 14 8 20 8"/>
-                <line x1="16" y1="13" x2="8" y2="13"/>
-                <line x1="16" y1="17" x2="8" y2="17"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Reports</span>
-        </a>
-        @endcan
+            {{-- Customers Activity --}}
+            @can('view activities')
+            <a href="#" title="Customers Activity"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    text-white/60 hover:bg-white/[0.07] hover:text-white">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Customers Activity</span>
+            </a>
+            @endcan
 
-        {{-- TOOLS --}}
-        <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Tools</div>
+            {{-- REPORTS --}}
+            @can('view reports')
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-1 mt-3 sidebar-text sidebar-section">Reports</div>
+            <a href="#" title="Reports"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    text-white/60 hover:bg-white/[0.07] hover:text-white">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <polyline points="14 2 14 8 20 8"/>
+                    <line x1="16" y1="13" x2="8" y2="13"/>
+                    <line x1="16" y1="17" x2="8" y2="17"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Reports</span>
+            </a>
+            @endcan
 
-        <a href="{{ route('calculators') }}" title="Calculators"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                {{ request()->routeIs('calculators') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <rect x="4" y="2" width="16" height="20" rx="2"/>
-                <line x1="8" y1="6" x2="16" y2="6"/>
-                <line x1="8" y1="10" x2="8" y2="10"/>
-                <line x1="12" y1="10" x2="12" y2="10"/>
-                <line x1="16" y1="10" x2="16" y2="10"/>
-                <line x1="8" y1="14" x2="8" y2="14"/>
-                <line x1="12" y1="14" x2="12" y2="14"/>
-                <line x1="16" y1="14" x2="16" y2="14"/>
-                <line x1="8" y1="18" x2="12" y2="18"/>
-                <line x1="16" y1="18" x2="16" y2="18"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Calculators</span>
-        </a>
+            {{-- TOOLS --}}
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-1 mt-3 sidebar-text sidebar-section">Tools</div>
 
-        {{-- ADMIN --}}
-        @can('manage settings')
-        <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-2 mt-4 sidebar-text sidebar-section">Admin</div>
+            <a href="{{ route('calculators') }}" title="Calculators"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    {{ request()->routeIs('calculators') ? 'bg-primary text-white' : 'text-white/60 hover:bg-white/[0.07] hover:text-white' }}">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <rect x="4" y="2" width="16" height="20" rx="2"/>
+                    <line x1="8" y1="6" x2="16" y2="6"/>
+                    <line x1="8" y1="10" x2="8" y2="10"/>
+                    <line x1="12" y1="10" x2="12" y2="10"/>
+                    <line x1="16" y1="10" x2="16" y2="10"/>
+                    <line x1="8" y1="14" x2="8" y2="14"/>
+                    <line x1="12" y1="14" x2="12" y2="14"/>
+                    <line x1="16" y1="14" x2="16" y2="14"/>
+                    <line x1="8" y1="18" x2="12" y2="18"/>
+                    <line x1="16" y1="18" x2="16" y2="18"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Calculators</span>
+            </a>
 
-        <a href="#" title="Audit Logs"
-        class="nav-link flex items-center justify-start gap-3 px-3 py-2.5 rounded-[10px] mb-1 transition-all
-                text-white/60 hover:bg-white/[0.07] hover:text-white">
-            <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
-            </svg>
-            <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Audit Logs</span>
-        </a>
-        @endcan
+            {{-- ADMIN --}}
+            @can('manage settings')
+            <div class="text-[10px] font-bold text-white/30 tracking-widest uppercase px-3 mb-1 mt-3 sidebar-text sidebar-section">Admin</div>
 
-    </nav>
+            <a href="#" title="Audit Logs"
+            class="nav-link flex items-center justify-start gap-3 px-3 py-2 rounded-[10px] mb-0.5 transition-all
+                    text-white/60 hover:bg-white/[0.07] hover:text-white">
+                <svg class="w-4 h-4 stroke-current fill-none stroke-2 flex-shrink-0" viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+                <span class="text-sm font-semibold sidebar-text whitespace-nowrap">Audit Logs</span>
+            </a>
+            @endcan
+
+        </nav>
 
     </aside>
 
