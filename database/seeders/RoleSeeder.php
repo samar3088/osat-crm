@@ -12,70 +12,81 @@ class RoleSeeder extends Seeder
     {
         app()[\Spatie\Permission\PermissionRegistrar::class]->forgetCachedPermissions();
 
-        // ── Permissions ────────────────────────────────
+        // ── Permissions ───────────────────────────────
         $permissions = [
-            // User management
-            'view users',
-            'create users',
-            'edit users',
-            'delete users',
+            // Clients
+            'view clients', 'create clients', 'edit clients', 'delete clients',
 
-            // Customer management
-            'view customers',
-            'create customers',
-            'edit customers',
-            'delete customers',
-            'export customers',
-
-            // Activity tracking
-            'view activities',
-            'create activities',
-            'edit activities',
-            'delete activities',
+            // Team Members
+            'view team_members', 'create team_members', 'edit team_members', 'delete team_members',
 
             // Conveyance
-            'view conveyance',
-            'create conveyance',
-            'approve conveyance',
+            'view conveyance', 'create conveyance', 'approve conveyance',
+
+            // Targets
+            'view targets', 'set targets',
 
             // Reports
-            'view reports',
-            'export reports',
+            'view reports', 'export reports',
 
-            // Settings & Admin
-            'manage settings',
-            'manage roles',
+            // Settings
+            'view settings', 'manage settings',
+
+            // Teams
+            'view teams', 'create teams', 'edit teams', 'delete teams',
+
+            // Service Flags
+            'view service_flags', 'create service_flags', 'resolve service_flags',
+
+            // Audit
+            'view audit_logs',
         ];
 
         foreach ($permissions as $permission) {
             Permission::firstOrCreate(['name' => $permission]);
         }
 
-        // ── 1. Super Admin — ALL permissions ──────────
+        // ── Roles ─────────────────────────────────────
         $superAdmin = Role::firstOrCreate(['name' => 'super_admin']);
+        $subAdmin   = Role::firstOrCreate(['name' => 'sub_admin']);
+        $opsAdmin   = Role::firstOrCreate(['name' => 'operations_admin']);
+        $teamMember = Role::firstOrCreate(['name' => 'team_member']);
+        $customer   = Role::firstOrCreate(['name' => 'customer']);
+
+        // ── Super Admin — all permissions ─────────────
         $superAdmin->syncPermissions(Permission::all());
 
-        // ── 2. Team Member / RM ───────────────────────
-        $teamMember = Role::firstOrCreate(['name' => 'team_member']);
-        $teamMember->syncPermissions([
-            'view customers',
-            'create customers',
-            'edit customers',
-            'view activities',
-            'create activities',
-            'edit activities',
-            'view conveyance',
-            'create conveyance',
+        // ── Sub Admin permissions ─────────────────────
+        $subAdmin->syncPermissions([
+            'view clients', 'create clients', 'edit clients',
+            'view team_members', 'create team_members', 'edit team_members', 'delete team_members',
+            'view conveyance', 'create conveyance', 'approve conveyance',
+            'view targets', 'set targets',
+            'view reports', 'export reports',
+            'view teams',
+            'view service_flags', 'create service_flags', 'resolve service_flags',
+        ]);
+
+        // ── Operations Admin permissions ──────────────
+        $opsAdmin->syncPermissions([
+            'view clients', 'edit clients',
+            'view team_members',
+            'view conveyance', 'create conveyance', 'approve conveyance',
+            'view targets',
             'view reports',
+            'view teams',
+            'view service_flags', 'create service_flags', 'resolve service_flags',
         ]);
 
-        // ── 3. Customer ───────────────────────────────
-        $customer = Role::firstOrCreate(['name' => 'customer']);
-        $customer->syncPermissions([
-            'view customers',  // own profile only — scoped in controller
-            'view reports',    // own reports only — scoped in controller
+        // ── Team Member permissions ───────────────────
+        $teamMember->syncPermissions([
+            'view clients', 'create clients', 'edit clients',
+            'view conveyance', 'create conveyance',
+            'view targets',
+            'view service_flags', 'create service_flags',
         ]);
 
-        $this->command->info('✅ 3 Roles seeded: super_admin, team_member, customer');
+        // ── Customer permissions ──────────────────────
+        $customer->syncPermissions([]);
     }
 }

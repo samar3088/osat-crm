@@ -7,6 +7,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class User extends Authenticatable
 {
@@ -145,5 +146,30 @@ class User extends Authenticatable
     public function auditLogs()
     {
         return $this->hasMany(AuditLog::class);
+    }
+
+    // ── Team Relationship ─────────────────────────────
+    public function team(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'team_id');
+    }
+
+    // ── Role Helpers (add alongside existing ones) ────
+    public function isSubAdmin(): bool
+    {
+        return $this->hasRole('sub_admin');
+    }
+
+    public function isOpsAdmin(): bool
+    {
+        return $this->hasRole('operations_admin');
+    }
+
+    // ── Check if user can manage team ────────────────
+    public function canManageTeam(Team $team): bool
+    {
+        if ($this->isSuperAdmin()) return true;
+        if ($this->isSubAdmin() && $this->team_id === $team->id) return true;
+        return false;
     }
 }

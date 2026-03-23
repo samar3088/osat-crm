@@ -11,6 +11,7 @@ use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\TeamMemberController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ConveyanceController;
+use App\Http\Controllers\TeamController;
 
 // ── Public Routes ────────────────────────────────────
 Route::get('/', fn() => redirect()->route('login'));
@@ -51,9 +52,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/calculators', [CalculatorController::class, 'index'])->name('calculators');
     });
 
-    // ── Team Members — Super Admin only ───────────────
+    // ── Super Admin Only ──────────────────────────────
     Route::middleware(['role:super_admin'])->group(function () {
-        // Static FIRST
+
+        // Team Members
         Route::get('/team-members',                       [TeamMemberController::class, 'index'])->name('team-members.index');
         Route::get('/team-members/list',                  [TeamMemberController::class, 'list'])->name('team-members.list');
         Route::get('/team-members/generate-code',         [TeamMemberController::class, 'generateCode'])->name('team-members.generate-code');
@@ -61,21 +63,38 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/team-members/export/excel',          [TeamMemberController::class, 'exportExcel'])->name('team-members.export-excel');
         Route::post('/team-members/upload-target',        [TeamMemberController::class, 'uploadTarget'])->name('team-members.upload-target');
         Route::post('/team-members',                      [TeamMemberController::class, 'store'])->name('team-members.store');
-        // Dynamic AFTER
         Route::get('/team-members/{teamMember}',          [TeamMemberController::class, 'show'])->name('team-members.show');
         Route::put('/team-members/{teamMember}',          [TeamMemberController::class, 'update'])->name('team-members.update');
         Route::patch('/team-members/{teamMember}/status', [TeamMemberController::class, 'toggleStatus'])->name('team-members.toggle-status');
         Route::delete('/team-members/{teamMember}',       [TeamMemberController::class, 'destroy'])->name('team-members.destroy');
         Route::post('/team-members/{teamMember}/target',  [TeamMemberController::class, 'setTarget'])->name('team-members.set-target');
+
+        // Teams — Static FIRST
+        Route::get('/teams',                              [TeamController::class, 'index'])->name('teams.index');
+        Route::get('/teams/list',                         [TeamController::class, 'list'])->name('teams.list');
+        Route::get('/teams/generate-code',                [TeamController::class, 'generateCode'])->name('teams.generate-code');
+        Route::post('/teams',                             [TeamController::class, 'store'])->name('teams.store');
+        // Teams — Dynamic AFTER
+        Route::get('/teams/{team}/members',               [TeamController::class, 'members'])->name('teams.members');
+        Route::get('/teams/{team}/members/list',          [TeamController::class, 'membersList'])->name('teams.members-list');
+        Route::post('/teams/{team}/members/assign',       [TeamController::class, 'assignMember'])->name('teams.assign-member');
+        Route::delete('/teams/{team}/members/{user}',     [TeamController::class, 'removeMember'])->name('teams.remove-member');
+        Route::post('/teams/{team}/transfer-clients',     [TeamController::class, 'transferClients'])->name('teams.transfer-clients');
+        Route::get('/teams/{team}',                       [TeamController::class, 'show'])->name('teams.show');
+        Route::put('/teams/{team}',                       [TeamController::class, 'update'])->name('teams.update');
+        Route::patch('/teams/{team}/status',              [TeamController::class, 'toggleStatus'])->name('teams.toggle-status');
+        Route::delete('/teams/{team}',                    [TeamController::class, 'destroy'])->name('teams.destroy');
+
+        // Conveyance approve/reject
+        Route::post('/conveyance/{conveyance}/approve',   [ConveyanceController::class, 'approve'])->name('conveyance.approve');
+        Route::post('/conveyance/{conveyance}/reject',    [ConveyanceController::class, 'reject'])->name('conveyance.reject');
     });
 
     // ── Customers ─────────────────────────────────────
-    // Static FIRST
     Route::get('/customers',                      [CustomerController::class, 'index'])->name('customers.index');
     Route::get('/customers/list',                 [CustomerController::class, 'list'])->name('customers.list');
     Route::get('/customers/export/excel',         [CustomerController::class, 'exportExcel'])->name('customers.export-excel');
     Route::post('/customers',                     [CustomerController::class, 'store'])->name('customers.store');
-    // Dynamic AFTER
     Route::get('/customers/{customer}/profile',   [CustomerController::class, 'profile'])->name('customers.profile');
     Route::get('/customers/{customer}',           [CustomerController::class, 'show'])->name('customers.show');
     Route::put('/customers/{customer}',           [CustomerController::class, 'update'])->name('customers.update');
@@ -83,20 +102,12 @@ Route::middleware(['auth'])->group(function () {
     Route::delete('/customers/{customer}',        [CustomerController::class, 'destroy'])->name('customers.destroy');
 
     // ── Conveyance ────────────────────────────────────
-    // Static FIRST
     Route::get('/conveyance',                     [ConveyanceController::class, 'index'])->name('conveyance.index');
     Route::get('/conveyance/list',                [ConveyanceController::class, 'list'])->name('conveyance.list');
     Route::get('/conveyance/stats',               [ConveyanceController::class, 'stats'])->name('conveyance.stats');
     Route::get('/conveyance/export/excel',        [ConveyanceController::class, 'exportExcel'])->name('conveyance.export-excel');
     Route::post('/conveyance',                    [ConveyanceController::class, 'store'])->name('conveyance.store');
-    // Dynamic AFTER
     Route::delete('/conveyance/{conveyance}',     [ConveyanceController::class, 'destroy'])->name('conveyance.destroy');
-
-    // Conveyance approve/reject — Super Admin only — AFTER static
-    Route::middleware(['role:super_admin'])->group(function () {
-        Route::post('/conveyance/{conveyance}/approve', [ConveyanceController::class, 'approve'])->name('conveyance.approve');
-        Route::post('/conveyance/{conveyance}/reject',  [ConveyanceController::class, 'reject'])->name('conveyance.reject');
-    });
 
     // ── Customer Portal ───────────────────────────────
     Route::get('/customer/dashboard', fn() => view('dashboard.index'))->name('customer.dashboard');
