@@ -36,6 +36,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/stats',               [DashboardController::class, 'stats'])->name('stats');
         Route::get('/targets',             [DashboardController::class, 'targets'])->name('targets');
         Route::get('/aum-trend',           [DashboardController::class, 'aumTrend'])->name('aum-trend');
+        Route::get('/aum-table',  [DashboardController::class, 'aumTable'])->name('aum-table');
+        Route::get('/aum-rm-list',[DashboardController::class, 'aumRmList'])->name('aum-rm-list');
         Route::get('/recent-activities',   [DashboardController::class, 'recentActivities'])->name('recent-activities');
         Route::get('/pending-conveyances', [DashboardController::class, 'pendingConveyances'])->name('pending-conveyances');
         Route::get('/today-birthdays',     [DashboardController::class, 'todayBirthdays'])->name('today-birthdays');
